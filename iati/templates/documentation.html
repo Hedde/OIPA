@@ -1,0 +1,42 @@
+<html>
+<head>
+    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
+    <style>
+        .doc-block {
+            background: #DDD;
+            margin: 10px 0;
+            padding: 5px 0;
+        }
+        .handler-doc {
+            margin-top: -15px;
+        }
+    </style>
+    <title>API documentation v.1.0</title>
+</head>
+<body>
+    <div class="container">
+    <h1>API documentation v.1.0</h1>
+
+    <ul>
+        {% for doc in docs %}
+            <li><a href="#{{ doc.name }}">{{ doc.name }}</a></li>
+        {% endfor %}
+    </ul>
+
+    {% for doc in docs %}
+        <div class="row doc-block" id="{{ doc.name }}">
+            <div class="span16">
+                <h2 style="padding: 0px; margin: 0px">{{ doc.name }}</h2>
+                {% if doc.doc %}
+                    <p class="handler-doc">{{ doc.doc|safe|linebreaksbr|urlize }}</p>
+                {% endif %}
+
+                {% if doc.resource_uri_template %}
+                    <p><span class="label notice">Resource URI:</span> {{ doc.resource_uri_template }}</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</body>
+</html>
