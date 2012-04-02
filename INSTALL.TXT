@@ -1,4 +1,4 @@
-IATI PARSER
+OIPA (OpenAid IATI Parser and API)
 ===========
 
 
