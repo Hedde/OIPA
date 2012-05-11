@@ -1,3 +1,5 @@
+# note: only an example!
+
 import os, sys
 
 apache_configuration= os.path.dirname(__file__)
@@ -5,10 +7,8 @@ project = os.path.dirname(apache_configuration)
 workspace = os.path.dirname(project)
 sys.path.append(workspace)
 
-sys.path.append('/var/lib/python-support/python2.5/django/')
-sys.path.append('/home/iati/public_html/iati.com/iati-xal/')
-sys.path.append('/home/iati/public_html/iati.com/iati-xal/iati/')
+sys.path.append('/whatever/must/be/included/')
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'iati.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 import django.core.handlers.wsgi
 application = django.core.handlers.wsgi.WSGIHandler()
