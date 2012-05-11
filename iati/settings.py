@@ -11,17 +11,17 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-   ('DWS', 'info@djangowebstudio.nl'),
+   ('***', '***'),
 )
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'iati',
-        'USER': 'iati808',
-        'PASSWORD': 'y7EBC31',
+        'ENGINE': '***',
+        'NAME': '***',
+        'USER': '***',
+        'PASSWORD': '***',
     }
 }
 
@@ -62,7 +62,7 @@ MEDIA_URL = '/media/'
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/admin/'
-STATIC_URL = 'http://iati.serpia-server-l1.com/media/'
+STATIC_URL = ''
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '1xrw3xlzdyu_s$qxdr84a6aen&lr$lai59txex$#&b4v5&1*lf'
