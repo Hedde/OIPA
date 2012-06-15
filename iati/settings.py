@@ -11,19 +11,21 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-   ('***', '***'),
-)
+    ('', ''),
+    )
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': '***',
-        'NAME': '***',
-        'USER': '***',
-        'PASSWORD': '***',
+        'ENGINE': '',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        },
     }
-}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -58,11 +60,7 @@ STATIC_ROOT = rel('media')
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/media/'
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/admin/'
-STATIC_URL = ''
+STATIC_URL = '/media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '1xrw3xlzdyu_s$qxdr84a6aen&lr$lai59txex$#&b4v5&1*lf'
@@ -71,8 +69,8 @@ SECRET_KEY = '1xrw3xlzdyu_s$qxdr84a6aen&lr$lai59txex$#&b4v5&1*lf'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+    #    'django.template.loaders.eggs.Loader',
+    )
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -81,16 +79,15 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.gzip.GZipMiddleware',
-)
+    )
 
 ROOT_URLCONF = 'iati.urls'
 
 TEMPLATE_DIRS = (
     rel('templates'),
-)
+    )
 
 INSTALLED_APPS = (
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -100,7 +97,8 @@ INSTALLED_APPS = (
     'data',
     'api',
     'piston',
-)
+    'tastypie',
+    )
 
 
 try:

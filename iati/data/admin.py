@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Organisation, RecipientCountryBudget, RecipientOrgBudget, TotalBudget, \
+from data.models.organisation import Organisation, RecipientCountryBudget, RecipientOrgBudget, TotalBudget,\
     Activity, Transaction, PolicyMarker, ParticipatingOrganisation,IATISet
 
 
