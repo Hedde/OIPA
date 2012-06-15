@@ -1,10 +1,10 @@
 from django.http import HttpResponse, Http404
 from django.db.models.loading import get_model
-from api.handlers import resource_registrar
+from api.v1.handlers import resource_registrar
 from piston.utils import rc
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from data.models import IATISet
+from data.models.organisation import IATISet
 
 
 def api(request, app_label, model_name, id=None):

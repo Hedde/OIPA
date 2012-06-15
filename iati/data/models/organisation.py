@@ -4,6 +4,9 @@ class IATISet(models.Model):
     organisation = models.CharField(max_length=500)
     last_updated = models.DateTimeField()
 
+    class Meta:
+        app_label = "data"
+
 
 class Organisation(models.Model):
     name = models.CharField(max_length=500)
@@ -17,6 +20,9 @@ class Organisation(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        app_label = "data"
+
 
 class BaseBudget(models.Model):
     organisation = models.ForeignKey(Organisation)
@@ -26,7 +32,7 @@ class BaseBudget(models.Model):
 
     class Meta:
         abstract = True
-
+        app_label = "data"
 
 class RecipientCountryBudget(BaseBudget):
     country_code = models.CharField(max_length=3)
@@ -35,14 +41,21 @@ class RecipientCountryBudget(BaseBudget):
     def __unicode__(self):
         return '%s %s' % (self.organisation, self.country_name)
 
+    class Meta:
+        app_label = "data"
 
 class RecipientOrgBudget(BaseBudget):
     recipient_org = models.CharField(max_length=500)
     recipient_ref = models.DecimalField(max_digits=20, decimal_places=0)
 
+    class Meta:
+        app_label = "data"
 
 class TotalBudget(BaseBudget):
     pass
+
+    class Meta:
+        app_label = "data"
 
 
 class Activity(models.Model):
@@ -78,6 +91,7 @@ class Activity(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = "data"
         verbose_name_plural = u'activities'
 
     def __unicode__(self):
@@ -94,6 +108,9 @@ class ParticipatingOrganisation(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        app_label = "data"
+
 
 class Transaction(models.Model):
     activity = models.ForeignKey(Activity)
@@ -103,6 +120,9 @@ class Transaction(models.Model):
     value = models.DecimalField(max_digits=20, decimal_places=2)
     value_date = models.DateField()
     transaction_date = models.DateField()
+
+    class Meta:
+        app_label = "data"
 
 
 class PolicyMarker(models.Model):
@@ -157,3 +177,6 @@ class PolicyMarker(models.Model):
     vocabulary = models.CharField(max_length=32)
     significance = models.CharField(max_length=2, blank=True)
     code = models.CharField(max_length=8)
+
+    class Meta:
+        app_label = "data"
