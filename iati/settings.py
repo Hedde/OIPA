@@ -12,7 +12,7 @@ TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('', ''),
-    )
+)
 
 MANAGERS = ADMINS
 
@@ -79,13 +79,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.gzip.GZipMiddleware',
-    )
+)
 
 ROOT_URLCONF = 'iati.urls'
 
 TEMPLATE_DIRS = (
     rel('templates'),
-    )
+)
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -98,7 +98,7 @@ INSTALLED_APPS = (
     'api',
     'piston',
     'tastypie',
-    )
+)
 
 
 try:
