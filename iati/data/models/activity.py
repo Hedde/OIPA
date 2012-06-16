@@ -10,10 +10,6 @@ from data.models.common import ReportingOrganisation
 from data.models.common import Sector
 
 
-class RecipientCountry(models.Model):
-    pass
-
-
 class IATIActivity(models.Model):
     iati_identifier = models.CharField(max_length=50, unique=True)
     reporting_organistion = models.ForeignKey(ReportingOrganisation)
@@ -36,6 +32,25 @@ class IATIActivity(models.Model):
     percentage = models.IntegerField() # **
 
     sector = models.ForeignKey(Sector)
+
+    collaboration_type = models.CharField(max_length=500, blank=True)
+    collaboration_type_code = models.CharField(max_length=50, blank=True)
+    default_flow_type = models.CharField(max_length=500, blank=True)
+    default_flow_type_code = models.CharField(max_length=50, blank=True)
+    default_aid_type = models.CharField(max_length=500, blank=True)
+    default_aid_type_code = models.CharField(max_length=50, blank=True)
+    default_finance_type = models.CharField(max_length=500, blank=True)
+    default_finance_code = models.CharField(max_length=50, blank=True)
+    default_tied_status = models.CharField(max_length=500, blank=True)
+    default_tied_status_code = models.CharField(max_length=50, blank=True)
+    activity_status = models.CharField(max_length=500, blank=True)
+    activity_status_code = models.CharField(max_length=50, blank=True)
+
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    date_updated = models.DateTimeField(auto_now=True, editable=False)
+
+    def __unicode__(self):
+        return self.iati_identifier
 
     class Meta:
         app_label = "data"

@@ -1,6 +1,10 @@
 from django.contrib import admin
 from data.models.organisation import Organisation, RecipientCountryBudget, RecipientOrgBudget, TotalBudget,\
     Activity, Transaction, PolicyMarker, ParticipatingOrganisation,IATISet
+from data.models.common import Sector
+
+
+admin.site.register(Sector)
 
 
 class PolicyMarkerAdmin(admin.ModelAdmin):

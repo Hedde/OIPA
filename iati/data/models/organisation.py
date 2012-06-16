@@ -34,6 +34,7 @@ class BaseBudget(models.Model):
         abstract = True
         app_label = "data"
 
+
 class RecipientCountryBudget(BaseBudget):
     country_code = models.CharField(max_length=3)
     country_name = models.CharField(max_length=255)
@@ -44,12 +45,14 @@ class RecipientCountryBudget(BaseBudget):
     class Meta:
         app_label = "data"
 
+
 class RecipientOrgBudget(BaseBudget):
     recipient_org = models.CharField(max_length=500)
     recipient_ref = models.DecimalField(max_digits=20, decimal_places=0)
 
     class Meta:
         app_label = "data"
+
 
 class TotalBudget(BaseBudget):
     pass
