@@ -11,17 +11,17 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Hedde van der Heide', 'h.vanderheide@intellimedia.nl'),
+    ('***', '***'),
 )
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'intelliadmin_iati',
-        'USER': 'intelliadmin',
-        'PASSWORD': 'IviVptPY',
+        'ENGINE': '***',
+        'NAME': '***',
+        'USER': '***',
+        'PASSWORD': '***',
         'HOST': '',
         'PORT': '',
         },
