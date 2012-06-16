@@ -1,36 +1,18 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<html>
-<head>
-    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
-    <style>
-        .doc-block {
-            background: #DDD;
-            margin: 10px 0;
-            padding: 5px 0;
-        }
-        .handler-doc {
-            margin-top: -15px;
-        }
-    </style>
-    <title>API documentation v2.0</title>
-</head>
-<body>
-    <div class="container">
-        <h1>API documentation v2.0</h1>
-        <p>Create some docs...</p>
+{% block content %}
+    <h1>API documentation v2.0</h1>
+    <p>Create some docs...</p>
 
-        <h3>Example API calls</h3>
-        <ul>
-            <li>/api/v2/organisations/?format=json&limit=0</li>
-            <li>/api/v2/organisations/?format=json&offset=2</li>
-            <li>/api/v2/organisations/?format=json</li>
-            <li>/api/v2/organisations/?format=xml</li>
-            <li>/api/v2/organisations/?format=yaml</li>
-            <li>/api/v2/activities/?format=json</li>
-        </ul>
+    <h3>Example API calls</h3>
+    <ul>
+        <li>/api/v2/organisations/?format=json&limit=0</li>
+        <li>/api/v2/organisations/?format=json&offset=2</li>
+        <li>/api/v2/organisations/?format=json</li>
+        <li>/api/v2/organisations/?format=xml</li>
+        <li>/api/v2/organisations/?format=yaml</li>
+        <li>/api/v2/activities/?format=json</li>
+    </ul>
 
-        <p>older docs: <a href="/api/v1/">version 1.0</a></p>
-    </div>
-</body>
-</html>
+    <p>older docs: <a href="/api/v1/">version 1.0</a></p>
+{% endblock %}

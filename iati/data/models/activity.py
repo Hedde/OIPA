@@ -70,7 +70,7 @@ class Transaction(models.Model):
     value_date = models.DateField()
     transaction_date = models.DateField()
     flow_type = models.ForeignKey(FlowType)
-    finance_type = models.CharField() # ***
+    finance_type = models.CharField(max_length=55) # ***
     aid_type = models.CharField(max_length=55)
     disbursement_channel = models.IntegerField(choices=DISBURSEMENT_CHANNEL_CHOICES)
     tied_aid_status = models.IntegerField(choices=TIED_AID_CHOICES)

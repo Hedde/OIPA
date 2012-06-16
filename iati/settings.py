@@ -11,17 +11,17 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('', ''),
+    ('Hedde van der Heide', 'h.vanderheide@intellimedia.nl'),
 )
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': '',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD': '',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'intelliadmin_iati',
+        'USER': 'intelliadmin',
+        'PASSWORD': 'IviVptPY',
         'HOST': '',
         'PORT': '',
         },
@@ -70,11 +70,12 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
     #    'django.template.loaders.eggs.Loader',
-    )
+)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -98,6 +99,7 @@ INSTALLED_APPS = (
     'api',
     'piston',
     'tastypie',
+    'utils',
 )
 
 

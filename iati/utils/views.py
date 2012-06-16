@@ -1,7 +1,10 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse
 from django.utils import simplejson
+from utils.forms import IATIActivitySourceXMLForm
+from utils.models import IATIActivitySourceXML
 
 
 class JSONResponse(HttpResponse):
@@ -42,3 +45,39 @@ def render_json(func):
             return data
         return JSONResponse(data)
     return wrapper
+
+
+@login_required
+def upload_activity_set(request):
+
+    form_class = IATIActivitySourceXMLForm
+    if request.method == 'POST':
+        form = form_class(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            # ...
+        else:
+            pass
+            # ...
+    else:
+        form = form_class()
+    return render_to_response("upload.html", {
+        "form": form,
+        "sets": IATIActivitySourceXML.objects.all()
+        }, context_instance=RequestContext(request))
+
+
+#    name = request.GET.get('name')
+#    xml = request.GET.get('xml')
+#    if name and xml:
+#        grab_it(name, "b", xml)
+#        return HttpResponse('Success')
+#
+#    # Dutch organisation set
+#    #    url = 'http://www.minbuza.nl/binaries/content/assets/minbuza/nl/services/opendata/iati_organisation.xml/iati_organisation.xml/hippogallery%3Aasset'
+#    # Dutch activity set
+#    #    url = 'http://www.minbuza.nl/binaries/content/assets/minbuza/nl/services/opendata/iati_activities.xml/iati_activities.xml/hippogallery%3Aasset'
+#    #    url = 'http://siteresources.worldbank.org/IATI/WB-ZA.xml'
+#    #    grab_it('iati_activities_wb_south_africa.xml',"b",url)
+#
+#    return HttpResponse('No set provided')
