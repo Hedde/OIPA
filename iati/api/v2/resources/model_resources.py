@@ -34,5 +34,5 @@ class SectorResource(ModelResource):
 
     # example to get_field_display usage
     def dehydrate(self, bundle):
-        bundle.data['vocabulary'] = self.obj_get(id=bundle.data['vocabulary']).get_vocabulary_display()
+        bundle.data['vocabulary'] = self.obj_get(vocabulary=bundle.data['vocabulary']).get_vocabulary_display()
         return bundle
