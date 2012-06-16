@@ -2,11 +2,14 @@ from django.conf.urls import *
 from django.contrib import admin
 from django.conf import settings
 
+
 admin.autodiscover()
 
 
 urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
+
+    (r'^utils/', include('utils.urls')),
 
     (r'^api/', include('api.urls')),
 
