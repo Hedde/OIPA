@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 from data.models.constants import COUNTRIES_TUPLE
 from data.models.constants import REGION_CHOICES
 from data.models.constants import TYPE_CHOICES
-from data.models.constants import VOCABULARY_CHOICES
 
 
 class Country(models.Model):
@@ -47,7 +46,8 @@ class Sector(models.Model):
                 sectors in the same vocabulary.
     """
     code = models.IntegerField(max_length=5)
-    vocabulary = models.IntegerField(max_length=12, choices=VOCABULARY_CHOICES)
+    vocabulary = models.CharField(max_length=55, blank=True, null=True)
+    vocabulary_code = models.CharField(max_length=15, blank=True, null=True)
     percentage = models.IntegerField()
 
     class Meta:
