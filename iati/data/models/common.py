@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # App specific
-from data.models.constants import COUNTRIES_TUPLE, TYPE_CHOICES
+from data.models.constants import COUNTRIES_TUPLE, TYPE_CHOICES, REGION_CHOICES
 
 
 class Country(models.Model):
@@ -15,7 +15,19 @@ class Country(models.Model):
         verbose_name_plural = _("countries")
 
     def __unicode__(self):
-        return "%s - %s" % (self.iso, self.get_name_display())
+        return "%s - %s" % (self.iso, self.get_iso_display())
+
+class Region(models.Model):
+    """
+    @code	    Machine-readable code for the entity being described.
+    @percentage	The percentage of the project allocated to this geopolitical region, if known.
+                Content must be a positive integer between 1 and 100, with no percentage sign.
+    """
+    code = models.CharField(max_length=2, primary_key=True, choices=REGION_CHOICES)
+    percentage = models.IntegerField()
+
+    def __unicode__(self):
+        return "%s - %s" % (self.code, self.get_code_display())
 
 
 class ReportingOrganisation(models.Model):
