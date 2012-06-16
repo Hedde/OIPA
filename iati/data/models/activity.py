@@ -9,6 +9,7 @@ from data.models.common import Region
 from data.models.common import ReportingOrganisation
 from data.models.common import Sector
 from data.models.constants import RELATED_CHOICES
+from data.models.constants import TRANSACTION_TYPE_CHOICES
 
 
 class IATIActivity(models.Model):
@@ -56,6 +57,19 @@ class IATIActivity(models.Model):
     class Meta:
         app_label = "data"
         verbose_name_plural = _(u"IATIActivities")
+
+
+class Transaction(models.Model):
+    iati_activity = models.ForeignKey(IATIActivity)
+    transaction_type = models.IntegerField(choices=TRANSACTION_TYPE_CHOICES)
+    provider_org = models.CharField(max_length=250)
+    receiver_org = models.CharField(max_length=100)
+    value = models.DecimalField(max_digits=20, decimal_places=2)
+    value_date = models.DateField()
+    transaction_date = models.DateField()
+
+    class Meta:
+        app_label = "data"
 
 
 class RelatedActivity(models.Model):

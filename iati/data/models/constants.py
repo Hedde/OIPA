@@ -9,6 +9,17 @@ RELATED_CHOICES = (
     (MULTIFUNDED, _(u"A multifunded, or co-funded activity. The identifier should be globally unique and shared by all reporters of this activity.")),
 )
 
+C, D, E, IF, IR, LR, R = range(1, 8)
+TRANSACTION_TYPE_CHOICES = (
+    (C, _(u"Commitment")),
+    (D, _(u"Disbursement")),
+    (E, _(u"Expenditure")),
+    (IF, _(u"Incoming Funds")),
+    (IR, _(u"Interest Repayment")),
+    (LR, _(u"Loan Repayment")),
+    (R, _(u"Reimbursement")),
+)
+
 TYPE_CHOICES = (
     (10, _(u"Government")),
     (15, _(u"Other Public Sector")),
