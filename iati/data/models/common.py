@@ -89,3 +89,9 @@ class Contact(models.Model):
 
     class Meta:
         app_label = "data"
+
+
+class FlowType(models.Model):
+    code = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=15)
+    description = models.TextField(blank=True, null=True)

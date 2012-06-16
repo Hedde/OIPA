@@ -20,6 +20,19 @@ TRANSACTION_TYPE_CHOICES = (
     (R, _(u"Reimbursement")),
 )
 
+TIED_AID_CHOICES = (
+    (3, _(u"Partially")),
+    (4, _(u"Tied")),
+    (5, _(u"Untied")),
+)
+
+DISBURSEMENT_CHANNEL_CHOICES = (
+    (1, _(u"Money is disbursed through central Ministry of Finance or Treasury")),
+    (2, _(u"Money is disbursed directly to the implementing institution and managed through a separate bank account")),
+    (3, _(u"Aid in kind: Donors utilise third party agencies, e.g. NGOs or management companies")),
+    (4, _(u"Aid in kind: Donors manage funds themselves")),
+)
+
 TYPE_CHOICES = (
     (10, _(u"Government")),
     (15, _(u"Other Public Sector")),

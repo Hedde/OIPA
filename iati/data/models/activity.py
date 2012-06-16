@@ -5,10 +5,13 @@ from django.utils.translation import ugettext_lazy as _
 # App specific
 from data.models.common import Contact
 from data.models.common import Country
+from data.models.common import FlowType
 from data.models.common import Region
 from data.models.common import ReportingOrganisation
 from data.models.common import Sector
+from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
 from data.models.constants import RELATED_CHOICES
+from data.models.constants import TIED_AID_CHOICES
 from data.models.constants import TRANSACTION_TYPE_CHOICES
 
 
@@ -37,8 +40,7 @@ class IATIActivity(models.Model):
 
     collaboration_type = models.CharField(max_length=500, blank=True, null=True)
     collaboration_type_code = models.CharField(max_length=50, blank=True, null=True)
-    default_flow_type = models.CharField(max_length=500, blank=True, null=True)
-    default_flow_type_code = models.CharField(max_length=50, blank=True, null=True)
+    default_flow_type = models.ForeignKey(FlowType)
     default_aid_type = models.CharField(max_length=500, blank=True, null=True)
     default_aid_type_code = models.CharField(max_length=50, blank=True, null=True)
     default_finance_type = models.CharField(max_length=500, blank=True, null=True)
@@ -67,6 +69,11 @@ class Transaction(models.Model):
     value = models.DecimalField(max_digits=20, decimal_places=2)
     value_date = models.DateField()
     transaction_date = models.DateField()
+    flow_type = models.ForeignKey(FlowType)
+    finance_type = models.CharField() # ***
+    aid_type = models.CharField(max_length=55)
+    disbursement_channel = models.IntegerField(choices=DISBURSEMENT_CHANNEL_CHOICES)
+    tied_aid_status = models.IntegerField(choices=TIED_AID_CHOICES)
 
     class Meta:
         app_label = "data"
