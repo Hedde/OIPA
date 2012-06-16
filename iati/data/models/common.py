@@ -3,7 +3,9 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # App specific
-from data.models.constants import COUNTRIES_TUPLE, TYPE_CHOICES, REGION_CHOICES
+from data.models.constants import COUNTRIES_TUPLE
+from data.models.constants import REGION_CHOICES
+from data.models.constants import TYPE_CHOICES
 
 
 class Country(models.Model):
@@ -24,10 +26,25 @@ class Region(models.Model):
     @percentage	The percentage of the project allocated to this geopolitical region, if known.
                 Content must be a positive integer between 1 and 100, with no percentage sign.
     """
-    code = models.CharField(max_length=2, primary_key=True, choices=REGION_CHOICES)
+    code = models.CharField(max_length=5, primary_key=True, choices=REGION_CHOICES)
 
     def __unicode__(self):
         return "%s - %s" % (self.code, self.get_code_display())
+
+
+class Sector(models.Model):
+    """
+    @code	    Machine-readable code for the entity being described.
+    @vocabulary	An identifier for the vocabulary in use, to segment sectors into different vocabularies
+                (e.g. DAC, OCHA) to aid with comparison and classification. If omitted, assume DAC.
+                See http://iatistandard.org/codelists/vocabulary
+    @percentage	The percentage of the project allocated to this sector, if known. Content must be a positive
+                integer between 1 and 100, with no percentage sign. Percentages are comparable only across
+                sectors in the same vocabulary.
+    """
+    code = models.IntegerField(max_length=5)
+    vocabulary = models.CharField(max_length=12, choices=REGION_CHOICES)
+    percentage = models.IntegerField()
 
 
 class ReportingOrganisation(models.Model):

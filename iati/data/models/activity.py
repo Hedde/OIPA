@@ -3,7 +3,11 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # App specific
-from data.models.common import ReportingOrganisation, Contact, Country, Region
+from data.models.common import Contact
+from data.models.common import Country
+from data.models.common import Region
+from data.models.common import ReportingOrganisation
+from data.models.common import Sector
 
 
 class RecipientCountry(models.Model):
@@ -26,10 +30,12 @@ class IATIActivity(models.Model):
 
     activity_contact = models.ForeignKey(Contact, blank=True, null=True)
 
-    recipient_country = models.ForeignKey(Country)
-    recipient_region = models.ForeignKey(Region)
+    recipient_country = models.ForeignKey(Country) # **
+    recipient_region = models.ForeignKey(Region) # **
     # TODO: Sub-national Geographic Location
-    percentage = models.IntegerField()
+    percentage = models.IntegerField() # **
+
+    sector = models.ForeignKey(Sector)
 
     class Meta:
         app_label = "data"
