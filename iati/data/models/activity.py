@@ -8,6 +8,7 @@ from data.models.common import Country
 from data.models.common import Region
 from data.models.common import ReportingOrganisation
 from data.models.common import Sector
+from data.models.constants import RELATED_CHOICES
 
 
 class IATIActivity(models.Model):
@@ -55,3 +56,30 @@ class IATIActivity(models.Model):
     class Meta:
         app_label = "data"
         verbose_name_plural = _(u"IATIActivities")
+
+
+class RelatedActivity(models.Model):
+    """
+    @ref    Machine-readable identification string for the business object being described.
+    @type   Free text describing the type of thing being referenced.
+    """
+    ref = models.IntegerField(choices=RELATED_CHOICES)
+    type = models.TextField()
+
+
+class Document(models.Model):
+    """
+    @url        The target URL of the external document, e.g. "http://www.example.org/doc.html".
+    @format     The MIME type of the external document, e.g. "application/pdf". A partial list of MIME types
+                appears at http://iatistandard.org/codelists/file_format
+    @language   The ISO 639 language code for the target document, e.g. "en".
+    """
+    iati_activity = models.ForeignKey(IATIActivity)
+    url = models.URLField()
+    format = models.CharField(max_length=55)
+    language = models.CharField(max_length=5)
+
+
+class Website(models.Model):
+    iati_activity = models.ForeignKey(IATIActivity)
+    url = models.URLField()

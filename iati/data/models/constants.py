@@ -1,6 +1,14 @@
 from django.utils.translation import ugettext_lazy as _
 
 
+PARENT, CHILD, SIBLING, MULTIFUNDED = range(1, 5)
+RELATED_CHOICES = (
+    (PARENT, _(u"An activity that contains sub-activities (sub-components)")),
+    (CHILD, _(u"A sub-activity (sub-component) of a larger activity (the parent)")),
+    (SIBLING, _(u"A sub-activity (sub-component) related to another sub-activity of the same parent")),
+    (MULTIFUNDED, _(u"A multifunded, or co-funded activity. The identifier should be globally unique and shared by all reporters of this activity.")),
+)
+
 TYPE_CHOICES = (
     (10, _(u"Government")),
     (15, _(u"Other Public Sector")),
