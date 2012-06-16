@@ -17,6 +17,7 @@ class Country(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.iso, self.get_iso_display())
 
+
 class Region(models.Model):
     """
     @code	    Machine-readable code for the entity being described.
@@ -24,7 +25,6 @@ class Region(models.Model):
                 Content must be a positive integer between 1 and 100, with no percentage sign.
     """
     code = models.CharField(max_length=2, primary_key=True, choices=REGION_CHOICES)
-    percentage = models.IntegerField()
 
     def __unicode__(self):
         return "%s - %s" % (self.code, self.get_code_display())
