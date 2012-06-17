@@ -52,4 +52,4 @@ class IATIXMLSource(models.Model):
                 except ValidationError, e:
                     pass
         # TODO: implement change
-        super(IATIXMLSource, self).save(self, force_update=False, using=None)
+        pass
