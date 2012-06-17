@@ -24,6 +24,7 @@ class ActivityResource(ModelResource):
         filtering = {
             # example to allow field specific filtering.
             'activity_status': ALL,
+            'recipient_country_code': ALL
             }
 
 class SectorResource(ModelResource):

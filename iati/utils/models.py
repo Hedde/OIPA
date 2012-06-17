@@ -1,3 +1,5 @@
+import os
+
 # Django specific
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -8,6 +10,12 @@ from StringIO import StringIO
 from django.core.files.base import ContentFile
 
 
+def fix(value):
+    return unicode(str(value).lower().replace(' ', '_'))
+
+def get_upload_path(instance, filename):
+    return os.path.join("utils", fix(instance.get_type_display()), fix(instance.publisher), fix(filename))
+
 class IATIXMLSource(models.Model):
     TYPE_CHOICES = (
         (1, _(u"Activity File")),
@@ -15,7 +23,8 @@ class IATIXMLSource(models.Model):
     )
     ref = models.CharField(verbose_name=_(u"Reference"), max_length=55, unique=True)
     type = models.IntegerField(choices=TYPE_CHOICES, default=1)
-    local_file = models.FileField(upload_to="utils/iati_xml_files", blank=True, null=True, editable=False)
+    publisher = models.CharField(max_length=100)
+    local_file = models.FileField(upload_to=get_upload_path, blank=True, null=True, editable=False)
     source_url = models.URLField()
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
