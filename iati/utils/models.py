@@ -18,8 +18,8 @@ def get_upload_path(instance, filename):
 
 class IATIXMLSource(models.Model):
     TYPE_CHOICES = (
-        (1, _(u"Activity File")),
-        (2, _(u"Organisation File")),
+        (1, _(u"Activity Files")),
+        (2, _(u"Organisation Files")),
     )
     ref = models.CharField(verbose_name=_(u"Reference"), max_length=55, unique=True)
     type = models.IntegerField(choices=TYPE_CHOICES, default=1)
