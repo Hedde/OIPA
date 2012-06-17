@@ -37,16 +37,19 @@ class IATIXMLSource(models.Model):
         return "/media/%s" % self.local_file
 
     def save(self, force_insert=False, force_update=False, using=None):
-        if self.ref and self.source_url:
-            if not self.ref[4:] == ".xml":
-                self.ref += ".xml"
-            file_url = self.source_url
-            try:
-                r = requests.get(file_url)
-                f = StringIO(r.content)
+        if not self.id:
+            if self.ref and self.source_url:
+                if not self.ref[4:] == ".xml":
+                    self.ref += ".xml"
+                file_url = self.source_url
+                try:
+                    r = requests.get(file_url)
+                    f = StringIO(r.content)
 
-                file = ContentFile(f.read(), self.ref)
-                self.local_file = file
-                super(IATIXMLSource, self).save(self, force_update=False, using=None)
-            except ValidationError, e:
-                pass
+                    file = ContentFile(f.read(), self.ref)
+                    self.local_file = file
+                    super(IATIXMLSource, self).save(self, force_update=False, using=None)
+                except ValidationError, e:
+                    pass
+        # TODO: implement change
+        super(IATIXMLSource, self).save(self, force_update=False, using=None)
