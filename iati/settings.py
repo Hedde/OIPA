@@ -7,7 +7,7 @@ def rel(*x):
 
 sys.path.insert(0, rel('..','lib'))
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -22,8 +22,8 @@ DATABASES = {
         'NAME': '***',
         'USER': '***',
         'PASSWORD': '***',
-        'HOST': '***',
-        'PORT': '***',
+        'HOST': '',
+        'PORT': '',
         },
     }
 
