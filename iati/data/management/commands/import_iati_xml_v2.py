@@ -1,9 +1,9 @@
 from django.core.management import BaseCommand
+from data.models import ReportingOrganisation
+from data.models.common import FlowType
 from settings import rel
 from lxml import etree, objectify
-from data.models.organisation import Organisation, RecipientCountryBudget, RecipientOrgBudget,\
-    TotalBudget, Activity, Transaction, PolicyMarker, ParticipatingOrganisation,\
-    IATISet
+from data.models.activity import IATIActivity
 from datetime import datetime
 from optparse import make_option
 from django.db.transaction import commit_on_success
@@ -29,69 +29,69 @@ class Parser(object):
 
 
 class OrganisationParser(Parser):
-
-    def parse(self):
-        count = len(self.root['iati-organisation'])
-        i = 0
-        for el in self.root['iati-organisation']:
-            i += 1
-            if i % 10 == 0 and self.verbosity >= 2:
-                print '%s of %s' % (i, count)
-            self._save_organisation(el)
-
-    def _save_organisation(self, el):
-        ref = el['reporting-org'].get('ref')
-        last_updated = self._parse_datetime(el.get('last-updated-datetime'))
-
-        try:
-            org = Organisation.objects.get(ref=ref)
-            if not self.force_update and org.last_updated >= last_updated:
-                return
-        except Organisation.DoesNotExist:
-            org = Organisation(ref=ref, last_updated=last_updated)
-
-        org.name = unicode(el.name)
-        org.default_currency = el.get('default-currency')
-        org.type = unicode(el['reporting-org'].get('type'))
-        org.save()
-
-        org.recipientcountrybudget_set.all().delete()
-
-        for item in el['recipient-country-budget']:
-            obj = RecipientCountryBudget(organisation=org)
-            self._parse_base_budget(item, obj)
-            obj.country_code = item['recipient-country'].get('code')
-            obj.country_name = unicode(item['recipient-country'])
-            obj.save()
-
-        org.recipientorgbudget_set.all().delete()
-
-        for item in el['recipient-org-budget']:
-            obj = RecipientOrgBudget(organisation=org)
-            self._parse_base_budget(item, obj)
-            obj.recipient_org = unicode(item['recipient-org'])
-            obj.recipient_ref = item['recipient-org'].get('ref')
-            obj.save()
-
-        org.totalbudget_set.all().delete()
-
-        for item in el['total-budget']:
-            obj = TotalBudget(organisation=org)
-            self._parse_base_budget(item, obj)
-            obj.save()
-
-    def _parse_base_budget(self, el, obj):
-        period_start = self._parse_date(el['period-start'].get('iso-date'))
-        if el['period-start']:
-            period_start.replace(year=el['period-start'])
-        obj.period_start = period_start
-
-        period_end = self._parse_date(el['period-end'].get('iso-date'))
-        if el['period-end']:
-            period_end.replace(year=el['period-end'])
-        obj.period_end = period_end
-
-        obj.value = el.value.text
+    pass
+#    def parse(self):
+#        count = len(self.root['iati-organisation'])
+#        i = 0
+#        for el in self.root['iati-organisation']:
+#            i += 1
+#            if i % 10 == 0 and self.verbosity >= 2:
+#                print '%s of %s' % (i, count)
+#            self._save_organisation(el)
+#
+#    def _save_organisation(self, el):
+#        ref = el['reporting-org'].get('ref')
+#        last_updated = self._parse_datetime(el.get('last-updated-datetime'))
+#
+#        try:
+#            org = Organisation.objects.get(ref=ref)
+#            if not self.force_update and org.last_updated >= last_updated:
+#                return
+#        except Organisation.DoesNotExist:
+#            org = Organisation(ref=ref, last_updated=last_updated)
+#
+#        org.name = unicode(el.name)
+#        org.default_currency = el.get('default-currency')
+#        org.type = unicode(el['reporting-org'].get('type'))
+#        org.save()
+#
+#        org.recipientcountrybudget_set.all().delete()
+#
+#        for item in el['recipient-country-budget']:
+#            obj = RecipientCountryBudget(organisation=org)
+#            self._parse_base_budget(item, obj)
+#            obj.country_code = item['recipient-country'].get('code')
+#            obj.country_name = unicode(item['recipient-country'])
+#            obj.save()
+#
+#        org.recipientorgbudget_set.all().delete()
+#
+#        for item in el['recipient-org-budget']:
+#            obj = RecipientOrgBudget(organisation=org)
+#            self._parse_base_budget(item, obj)
+#            obj.recipient_org = unicode(item['recipient-org'])
+#            obj.recipient_ref = item['recipient-org'].get('ref')
+#            obj.save()
+#
+#        org.totalbudget_set.all().delete()
+#
+#        for item in el['total-budget']:
+#            obj = TotalBudget(organisation=org)
+#            self._parse_base_budget(item, obj)
+#            obj.save()
+#
+#    def _parse_base_budget(self, el, obj):
+#        period_start = self._parse_date(el['period-start'].get('iso-date'))
+#        if el['period-start']:
+#            period_start.replace(year=el['period-start'])
+#        obj.period_start = period_start
+#
+#        period_end = self._parse_date(el['period-end'].get('iso-date'))
+#        if el['period-end']:
+#            period_end.replace(year=el['period-end'])
+#        obj.period_end = period_end
+#
+#        obj.value = el.value.text
 
 
 class ActivityParser(Parser):
@@ -106,28 +106,31 @@ class ActivityParser(Parser):
             self._save_activity(el)
 
     def _save_activity(self, el):
-        identifier = el['iati-identifier']
-        last_updated = self._parse_datetime(el.get('last-updated-datetime'))
+        iati_identifier = el['iati-identifier']
+        date_updated = self._parse_datetime(el.get('last-updated-datetime'))
 
         try:
-            activity = Activity.objects.get(identifier=identifier)
-            if not self.force_update and activity.last_updated >= last_updated:
+            activity = IATIActivity.objects.get(iati_identifier=iati_identifier)
+            if not self.force_update and activity.date_updated >= date_updated:
                 return
-        except Activity.DoesNotExist:
-            activity = Activity(identifier=identifier, last_updated=last_updated)
+        except IATIActivity.DoesNotExist:
+            activity = IATIActivity(iati_identifier=iati_identifier, date_updated=date_updated)
 
         org_ref = el['reporting-org'].get('ref')
 
         try:
-            activity.organisation = Organisation.objects.get(ref=org_ref)
-        except Organisation.DoesNotExist:
-            print 'Activity organisation does not exist'
+            activity.organisation = ReportingOrganisation.objects.get(ref=org_ref)
+        except ReportingOrganisation.DoesNotExist:
+            org_type = el['reporting-org'].get('type')
+            print 'create org if requirements are present' # TODO
+
             return
 
         activity.title = unicode(el.title)
         activity.description = unicode(el.description)
         activity.sector = unicode(el.sector)
         activity.sector_code = el.sector.get('code')
+        activity.flow_type = FlowType(code=1, name='test') # HARD CODE
 
         for item in el['activity-date']:
             name = item.get('type').replace('-', '_')
@@ -136,15 +139,6 @@ class ActivityParser(Parser):
                 if date_str:
                     setattr(activity, name, self._parse_date(date_str))
 
-        fields = ['collaboration-type', 'default-flow-type', 'default-aid-type',
-                  'default-finance-type', 'default-tied-status', 'activity-status']
-
-        for name in fields:
-            field_name = name.replace('-', '_')
-            code_field_name = field_name + '_code'
-            setattr(activity, field_name, unicode(el[name]))
-            setattr(activity, code_field_name, el[name].get('code') or '')
-
         try:
             activity.recipient_country_code = el['recipient-country'].get('code')
         except AttributeError:
@@ -152,8 +146,7 @@ class ActivityParser(Parser):
         activity.save()
 
         # save participating-org
-
-        activity.participatingorganisation_set.all().delete()
+        #        activity.participatingorganisation_set.all().delete()
 
         for item in el['participating-org']:
             self._save_participating_org(item, activity)
@@ -239,16 +232,19 @@ class Command(BaseCommand):
 
     @commit_on_success
     def save(self, tree, force_update=False, verbosity=2):
+        print 'save'
         try:
+            print tree.getroot().tag
             parser_cls = self.parsers[tree.getroot().tag]
+            print parser_cls
             parser_cls(tree, force_update, verbosity).parse()
-            try:
-                iatiset = IATISet.objects.get(organisation='Dutch Government')
-            except IATISet.DoesNotExist:
-                IATISet.objects.create(organisation='Dutch Government', last_updated=datetime.now())
-            else:
-                iatiset.last_updated = datetime.now()
-                iatiset.save()
+        #            try:
+        #                iatiset = IATISet.objects.get(organisation='Dutch Government')
+        #            except IATISet.DoesNotExist:
+        #                IATISet.objects.create(organisation='Dutch Government', last_updated=datetime.now())
+        #            else:
+        #                iatiset.last_updated = datetime.now()
+        #                iatiset.save()
         except KeyError:
             raise ImportError('Undefined document structure')
 

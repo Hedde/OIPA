@@ -1,9 +1,21 @@
+# Django specific
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
+
+import requests
+from StringIO import StringIO
+from django.core.files.base import ContentFile
 
 
-class IATIActivitySourceXML(models.Model):
-    ref = models.CharField(max_length=55, unique=True)
-    local_file = models.FileField(upload_to="utils/activity", blank=True, null=True)
+class IATIXMLSource(models.Model):
+    TYPE_CHOICES = (
+        (1, _(u"Activity File")),
+        (2, _(u"Organisation File")),
+    )
+    ref = models.CharField(verbose_name=_(u"Reference"), max_length=55, unique=True)
+    type = models.IntegerField(choices=TYPE_CHOICES, default=1)
+    local_file = models.FileField(upload_to="utils/iati_xml_files", blank=True, null=True, editable=False)
     source_url = models.URLField()
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -11,3 +23,21 @@ class IATIActivitySourceXML(models.Model):
 
     class Meta:
         app_label = "utils"
+
+    def get_absolute_url(self):
+        return "/media/%s" % self.local_file
+
+    def save(self, force_insert=False, force_update=False, using=None):
+        if self.ref and self.source_url:
+            if not self.ref[4:] == ".xml":
+                self.ref += ".xml"
+            file_url = self.source_url
+            try:
+                r = requests.get(file_url)
+                f = StringIO(r.content)
+
+                file = ContentFile(f.read(), self.ref)
+                self.local_file = file
+                super(IATIXMLSource, self).save(self, force_update=False, using=None)
+            except ValidationError, e:
+                pass
