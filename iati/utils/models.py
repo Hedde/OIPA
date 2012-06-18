@@ -2,12 +2,12 @@ import os
 
 # Django specific
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-import requests
 from StringIO import StringIO
-from django.core.files.base import ContentFile
+
 
 
 def fix(value):
@@ -43,9 +43,16 @@ class IATIXMLSource(models.Model):
                 self.ref += ".xml"
             file_url = self.source_url
             try:
-                r = requests.get(file_url)
-                f = StringIO(r.content)
-
+                try:
+                    # python 2.7
+                    import requests
+                    r = requests.get(file_url)
+                    f = StringIO(r.content)
+                except ImportError:
+                    # python 2.6
+                    import urllib2
+                    r = urllib2.urlopen(file_url)
+                    f = StringIO(r)
                 file = ContentFile(f.read(), self.ref)
                 self.local_file = file
                 super(IATIXMLSource, self).save(self, force_update=False, using=None)

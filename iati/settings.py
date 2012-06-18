@@ -10,22 +10,12 @@ sys.path.insert(0, rel('..','lib'))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    ('***', '***'),
-    )
+from local_settings import ADMINS, DATABASES
+ADMINS = ADMINS
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': '***',
-        'NAME': '***',
-        'USER': '***',
-        'PASSWORD': '***',
-        'HOST': '',
-        'PORT': '',
-        },
-    }
+DATABASES = DATABASES
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -101,9 +91,3 @@ INSTALLED_APPS = (
     'tastypie',
     'utils',
 )
-
-
-try:
-    from settings_local import *
-except ImportError:
-    pass
