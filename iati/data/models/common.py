@@ -5,7 +5,6 @@ from django.utils.translation import ugettext_lazy as _
 # App specific
 from data.models.constants import COUNTRIES_TUPLE
 from data.models.constants import REGION_CHOICES
-from data.models.constants import TYPE_CHOICES
 
 
 class Country(models.Model):
