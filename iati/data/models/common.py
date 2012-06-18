@@ -21,11 +21,6 @@ class Country(models.Model):
 
 
 class Region(models.Model):
-    """
-    @code       Machine-readable code for the entity being described.
-    @percentage The percentage of the project allocated to this geopolitical region, if known.
-                Content must be a positive integer between 1 and 100, with no percentage sign.
-    """
     code = models.CharField(max_length=5, primary_key=True, choices=REGION_CHOICES)
 
     def __unicode__(self):
@@ -36,11 +31,6 @@ class Region(models.Model):
 
 
 class Organisation(models.Model):
-    """
-    @ref        Machine-readable identification string for the business object being described.
-    @type       Free text describing the type of thing being referenced
-    @org-name   The name of the organisation
-    """
     ref = models.CharField(max_length=255)
     type = models.IntegerField(choices=TYPE_CHOICES, blank=True, null=True)
     org_name = models.CharField(max_length=255)
@@ -116,12 +106,6 @@ class BudgetType(CommonType):
 
 
 class Sector(models.Model):
-    """
-    @code       Machine-readable code for the entity being described.
-    @vocabulary An identifier for the vocabulary in use, to segment sectors into different vocabularies
-                (e.g. DAC, OCHA) to aid with comparison and classification. If omitted, assume DAC.
-                See http://iatistandard.org/codelists/vocabulary
-    """
     code = models.IntegerField(max_length=5)
     vocabulary_type = models.ForeignKey(VocabularyType, blank=True, null=True)
 
