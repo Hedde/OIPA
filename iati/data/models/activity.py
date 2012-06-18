@@ -14,12 +14,12 @@ from data.models.common import SignificanceType
 from data.models.common import VocabularyType
 from data.models.common import ActivityStatusType
 from data.models.common import Region
-from data.models.common import Organisation
 from data.models.common import Sector
 from data.models.common import Document
 from data.models.common import Website
 from data.models.common import Budget
 from data.models.common import CurrencyType
+from data.models.organisation import Organisation
 from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
 from data.models.constants import RELATED_CHOICES
 from data.models.constants import TIED_AID_CHOICES
@@ -98,23 +98,6 @@ class IATIActivityCountry(Country):
 class IATIActivitySector(Sector):
     iati_activity = models.ForeignKey(IATIActivity)
     percentage = models.IntegerField()
-
-    class Meta:
-        app_label = "data"
-
-
-class ParticipatingOrganisation(models.Model):
-    """
-    Note: participationOrg field NOT YET described in activity standaard
-    """
-    iati_activity = models.ForeignKey(IATIActivity)
-    name = models.CharField(max_length=500)
-    role = models.CharField(max_length=500)
-    type = models.CharField(max_length=250)
-    ref = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
 
     class Meta:
         app_label = "data"

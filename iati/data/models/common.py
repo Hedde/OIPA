@@ -30,16 +30,6 @@ class Region(models.Model):
         app_label = "data"
 
 
-class Organisation(models.Model):
-    ref = models.CharField(max_length=255)
-    type = models.IntegerField(choices=TYPE_CHOICES, blank=True, null=True)
-    org_name = models.CharField(max_length=255)
-    org_name_lang = models.CharField(max_length=255, blank=True, null=True)
-
-    class Meta:
-        app_label = "data"
-
-
 class CommonType(models.Model):
     code = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=15)

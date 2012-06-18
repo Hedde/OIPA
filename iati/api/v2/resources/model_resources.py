@@ -8,7 +8,7 @@ from tastypie.serializers import Serializer
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 # Data specific
-from data.models.activity import Organisation
+from data.models.organisation import Organisation
 
 
 class OrganisationResource(ModelResource):
