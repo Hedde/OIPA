@@ -1,11 +1,11 @@
 from urllib2 import HTTPRedirectHandler
 from api.v1.handlers import resource_registrar
-from data.models.organisation import Organisation, RecipientCountryBudget, RecipientOrgBudget, TotalBudget, Activity, Transaction, PolicyMarker
+#from data.models.organisation import Organisation, RecipientCountryBudget, RecipientOrgBudget, TotalBudget, Activity, Transaction, PolicyMarker
 from django.conf.urls import *
 from piston.doc import documentation_view
 
-resource_registrar.register(Transaction, Activity, TotalBudget, RecipientOrgBudget,
-    RecipientCountryBudget, Organisation, PolicyMarker)
+#resource_registrar.register(Transaction, Activity, TotalBudget, RecipientOrgBudget,
+#    RecipientCountryBudget, Organisation, PolicyMarker)
 
 urlpatterns = patterns('api.v1.views',
     url('^$', documentation_view),
