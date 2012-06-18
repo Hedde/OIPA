@@ -2,12 +2,12 @@
 from django.db import models
 
 # App specific
-from data.models.constants import TYPE_CHOICES
+from data.models.constants import ORGANISATION_TYPE_CHOICES
 
 
 class Organisation(models.Model):
-    ref = models.CharField(max_length=255)
-    type = models.IntegerField(choices=TYPE_CHOICES, blank=True, null=True)
+    ref = models.CharField(max_length=50)
+    type = models.IntegerField(choices=ORGANISATION_TYPE_CHOICES, blank=True, null=True)
     org_name = models.CharField(max_length=255)
     org_name_lang = models.CharField(max_length=255, blank=True, null=True)
 
@@ -15,18 +15,15 @@ class Organisation(models.Model):
         app_label = "data"
 
 
-class ParticipatingOrganisation(models.Model):
+class ParticipatingOrganisation(Organisation):
     """
     Note: participationOrg field NOT YET described in activity standaard
     """
     iati_activity = models.ForeignKey('IATIActivity') # import as string to avoid import circle
-    name = models.CharField(max_length=500)
     role = models.CharField(max_length=500)
-    type = models.CharField(max_length=250)
-    ref = models.CharField(max_length=50)
 
     def __unicode__(self):
-        return self.name
+        return self.org_name
 
     class Meta:
         app_label = "data"

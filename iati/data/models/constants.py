@@ -33,7 +33,7 @@ DISBURSEMENT_CHANNEL_CHOICES = (
     (4, _(u"Aid in kind: Donors manage funds themselves")),
 )
 
-TYPE_CHOICES = (
+ORGANISATION_TYPE_CHOICES = (
     (10, _(u"Government")),
     (15, _(u"Other Public Sector")),
     (21, _(u"International NGO")),
