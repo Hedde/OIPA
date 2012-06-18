@@ -8,6 +8,7 @@ from tastypie.serializers import Serializer
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 # Data specific
+from data.models.activity import IATIActivity
 from data.models.organisation import Organisation
 
 
@@ -17,17 +18,17 @@ class OrganisationResource(ModelResource):
         resource_name = 'organisations'
         serializer = Serializer(formats=['xml', 'json', 'yaml'])
 
-#class ActivityResource(ModelResource):
-#    class Meta:
-#        queryset = Activity.objects.all()
-#        resource_name = 'activities'
-#        serializer = Serializer(formats=['xml', 'json', 'yaml'])
-#        filtering = {
-#            # example to allow field specific filtering.
-#            'activity_status': ALL,
-#            'recipient_country_code': ALL
-#            }
-#
+class ActivityResource(ModelResource):
+    class Meta:
+        queryset = IATIActivity.objects.all()
+        resource_name = 'activities'
+        serializer = Serializer(formats=['xml', 'json', 'yaml'])
+        filtering = {
+            # example to allow field specific filtering.
+            'activity_status': ALL,
+            'recipient_country_code': ALL
+            }
+
 #class SectorResource(ModelResource):
 #    class Meta:
 #        queryset = Sector.objects.all()
