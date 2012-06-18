@@ -5,10 +5,21 @@ from django.utils.translation import ugettext_lazy as _
 # App specific
 from data.models.common import Contact
 from data.models.common import Country
+from data.models.common import CollaborationType
 from data.models.common import FlowType
+from data.models.common import AidType
+from data.models.common import FinanceType
+from data.models.common import TiedAidStatusType
+from data.models.common import SignificanceType
+from data.models.common import VocabularyType
+from data.models.common import ActivityStatusType
 from data.models.common import Region
-from data.models.common import ReportingOrganisation
+from data.models.common import Organisation
 from data.models.common import Sector
+from data.models.common import Document
+from data.models.common import Website
+from data.models.common import Budget
+from data.models.common import CurrencyType
 from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
 from data.models.constants import RELATED_CHOICES
 from data.models.constants import TIED_AID_CHOICES
@@ -16,39 +27,23 @@ from data.models.constants import TRANSACTION_TYPE_CHOICES
 
 
 class IATIActivity(models.Model):
-    iati_identifier = models.CharField(max_length=50, unique=True)
-    reporting_organistion = models.ForeignKey(ReportingOrganisation)
+    iati_identifier = models.CharField(max_length=50, primary_key=True, unique=True)
+    reporting_organistion = models.ForeignKey(Organisation)
 
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    activity_status = models.CharField(max_length=500, blank=True, null=True)
-    activity_status_code = models.CharField(max_length=50, blank=True, null=True)
+    activity_status = models.ForeignKey(ActivityStatusType)
 
     start_planned = models.DateField(blank=True, null=True)
     start_actual = models.DateField(blank=True, null=True)
     end_planned = models.DateField(blank=True, null=True)
     end_actual = models.DateField(blank=True, null=True)
 
-    activity_contact = models.ForeignKey(Contact, blank=True, null=True)
-
-    recipient_country = models.ForeignKey(Country, blank=True, null=True) # **
-    recipient_region = models.ForeignKey(Region, blank=True, null=True) # **
     # TODO: Sub-national Geographic Location
-    percentage = models.IntegerField(blank=True, null=True) # **
 
-    sector = models.ForeignKey(Sector)
-
-    collaboration_type = models.CharField(max_length=500, blank=True, null=True)
-    collaboration_type_code = models.CharField(max_length=50, blank=True, null=True)
+    collaboration_type = models.ForeignKey(CollaborationType, blank=True, null=True)
     default_flow_type = models.ForeignKey(FlowType)
-    default_aid_type = models.CharField(max_length=500, blank=True, null=True)
-    default_aid_type_code = models.CharField(max_length=50, blank=True, null=True)
-    default_finance_type = models.CharField(max_length=500, blank=True, null=True)
-    default_finance_code = models.CharField(max_length=50, blank=True, null=True)
-    default_tied_status = models.CharField(max_length=500, blank=True, null=True)
-    default_tied_status_code = models.CharField(max_length=50, blank=True, null=True)
-    activity_status = models.CharField(max_length=500, blank=True, null=True)
-    activity_status_code = models.CharField(max_length=50, blank=True, null=True)
+    default_aid_type = models.ForeignKey(AidType, blank=True, null=True)
+    default_finance_type = models.ForeignKey(FinanceType, blank=True, null=True)
+    default_tied_status_type = models.ForeignKey(TiedAidStatusType, blank=True, null=True)
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -61,19 +56,103 @@ class IATIActivity(models.Model):
         verbose_name_plural = _(u"IATIActivities")
 
 
+class IATIActivityTitle(models.Model):
+    iati_activity = models.ForeignKey(IATIActivity)
+    title = models.CharField(max_length=255)
+    language = models.ForeignKey(Country)
+
+
+class IATIActivityDescription(models.Model):
+    iati_activity = models.ForeignKey(IATIActivity)
+    description = models.TextField()
+    language = models.ForeignKey(Country)
+
+
+class OtherIdentifier(models.Model):
+    """
+    @owner-ref      An identifier for the owner of this identifier, in URI format. See the list of
+                    officially-registered organizations at http://iatistandard.org/codelists/organisation
+    @owner-name
+    """
+    iati_activity = models.ForeignKey(IATIActivity)
+    owner_ref = models.CharField(max_length=255)
+    owner_name = models.CharField(max_length=255)
+
+
+class IATIActivityRegion(Region):
+    iati_activity = models.ForeignKey(IATIActivity)
+    percentage = models.IntegerField()
+
+    class Meta:
+        app_label = "data"
+
+
+class IATIActivityCountry(Country):
+    iati_activity = models.ForeignKey(IATIActivity)
+    percentage = models.IntegerField()
+
+    class Meta:
+        app_label = "data"
+
+
+class IATIActivitySector(Sector):
+    iati_activity = models.ForeignKey(IATIActivity)
+    percentage = models.IntegerField()
+
+    class Meta:
+        app_label = "data"
+
+
+class ParticipatingOrganisation(models.Model):
+    """
+    Note: participationOrg field NOT YET described in activity standaard
+    """
+    iati_activity = models.ForeignKey(IATIActivity)
+    name = models.CharField(max_length=500)
+    role = models.CharField(max_length=500)
+    type = models.CharField(max_length=250)
+    ref = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        app_label = "data"
+
+
 class Transaction(models.Model):
+    """
+    If omitted, the provider organisation is the reporting organisation
+    """
     iati_activity = models.ForeignKey(IATIActivity)
     transaction_type = models.IntegerField(choices=TRANSACTION_TYPE_CHOICES)
-    provider_org = models.CharField(max_length=250)
-    receiver_org = models.CharField(max_length=100)
+    provider_org = models.ForeignKey(Organisation, related_name='provider_org')
+    receiver_org = models.ForeignKey(Organisation, related_name='receiver_org')
     value = models.DecimalField(max_digits=20, decimal_places=2)
     value_date = models.DateField()
     transaction_date = models.DateField()
     flow_type = models.ForeignKey(FlowType)
-    finance_type = models.CharField(max_length=55) # ***
-    aid_type = models.CharField(max_length=55)
+    finance_type = models.ForeignKey(FinanceType)
+    aid_type = models.ForeignKey(AidType)
     disbursement_channel = models.IntegerField(choices=DISBURSEMENT_CHANNEL_CHOICES)
-    tied_aid_status = models.IntegerField(choices=TIED_AID_CHOICES)
+    tied_aid_status_type = models.IntegerField(choices=TIED_AID_CHOICES)
+
+    class Meta:
+        app_label = "data"
+
+
+class ActivityBudget(Budget):
+    iati_activity = models.ForeignKey(IATIActivity)
+
+    class Meta:
+        app_label = "data"
+
+
+class PlannedDisbursement(models.Model):
+    iati_activity = models.ForeignKey(IATIActivity)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    currency = models.ForeignKey(CurrencyType)
 
     class Meta:
         app_label = "data"
@@ -88,19 +167,32 @@ class RelatedActivity(models.Model):
     type = models.TextField()
 
 
-class Document(models.Model):
-    """
-    @url        The target URL of the external document, e.g. "http://www.example.org/doc.html".
-    @format     The MIME type of the external document, e.g. "application/pdf". A partial list of MIME types
-                appears at http://iatistandard.org/codelists/file_format
-    @language   The ISO 639 language code for the target document, e.g. "en".
-    """
+class IATIActivityContact(Contact):
     iati_activity = models.ForeignKey(IATIActivity)
-    url = models.URLField()
-    format = models.CharField(max_length=55)
-    language = models.CharField(max_length=5)
+
+    class Meta:
+        app_label = "data"
 
 
-class Website(models.Model):
+class IATIActivityDocument(Document):
     iati_activity = models.ForeignKey(IATIActivity)
-    url = models.URLField()
+
+    class Meta:
+        app_label = "data"
+
+
+class IATIActivityWebsite(Website):
+    iati_activity = models.ForeignKey(IATIActivity)
+
+    class Meta:
+        app_label = "data"
+
+
+class IATIActivityPolicyMarker(models.Model):
+    iati_activity = models.ForeignKey(IATIActivity)
+    code = models.CharField(max_length=8)
+    vocabulary_type = models.ForeignKey(VocabularyType, blank=True, null=True)
+    significance_type = models.ForeignKey(SignificanceType, blank=True, null=True)
+
+    class Meta:
+        app_label = "data"

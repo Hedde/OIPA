@@ -35,35 +35,105 @@ class Region(models.Model):
         app_label = "data"
 
 
-class Sector(models.Model):
-    """
-    @code       Machine-readable code for the entity being described.
-    @vocabulary An identifier for the vocabulary in use, to segment sectors into different vocabularies
-                (e.g. DAC, OCHA) to aid with comparison and classification. If omitted, assume DAC.
-                See http://iatistandard.org/codelists/vocabulary
-    @percentage The percentage of the project allocated to this sector, if known. Content must be a positive
-                integer between 1 and 100, with no percentage sign. Percentages are comparable only across
-                sectors in the same vocabulary.
-    """
-    code = models.IntegerField(max_length=5)
-    vocabulary = models.CharField(max_length=55, blank=True, null=True)
-    vocabulary_code = models.CharField(max_length=15, blank=True, null=True)
-    percentage = models.IntegerField()
-
-    class Meta:
-        app_label = "data"
-
-
-class ReportingOrganisation(models.Model):
+class Organisation(models.Model):
     """
     @ref        Machine-readable identification string for the business object being described.
     @type       Free text describing the type of thing being referenced
     @org-name   The name of the organisation
     """
     ref = models.CharField(max_length=255)
-    type = models.IntegerField(choices=TYPE_CHOICES)
+    type = models.IntegerField(choices=TYPE_CHOICES, blank=True, null=True)
     org_name = models.CharField(max_length=255)
-    org_name_lang = models.CharField(max_length=255)
+    org_name_lang = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        app_label = "data"
+
+
+class CommonType(models.Model):
+    code = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=15)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class VocabularyType(CommonType):
+    class Meta:
+        app_label = "data"
+
+
+class SignificanceType(CommonType):
+    class Meta:
+        app_label = "data"
+
+
+class CollaborationType(CommonType):
+    class Meta:
+        app_label = "data"
+
+
+class FlowType(CommonType):
+    class Meta:
+        app_label = "data"
+
+
+class AidType(CommonType):
+    class Meta:
+        app_label = "data"
+
+
+class FinanceType(CommonType):
+    class Meta:
+        app_label = "data"
+
+
+class TiedAidStatusType(CommonType):
+    class Meta:
+        app_label = "data"
+
+
+class CurrencyType(CommonType):
+    language = models.ForeignKey(Country, blank=True, null=True)
+
+    class Meta:
+        app_label = "data"
+
+
+class ActivityStatusType(CommonType):
+    language = models.ForeignKey(Country, blank=True, null=True)
+
+    class Meta:
+        app_label = "data"
+
+
+class BudgetType(CommonType):
+    language = models.ForeignKey(Country, blank=True, null=True)
+
+    class Meta:
+        app_label = "data"
+
+
+class Sector(models.Model):
+    """
+    @code       Machine-readable code for the entity being described.
+    @vocabulary An identifier for the vocabulary in use, to segment sectors into different vocabularies
+                (e.g. DAC, OCHA) to aid with comparison and classification. If omitted, assume DAC.
+                See http://iatistandard.org/codelists/vocabulary
+    """
+    code = models.IntegerField(max_length=5)
+    vocabulary_type = models.ForeignKey(VocabularyType, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class Budget(BudgetType):
+    period_start = models.DateField()
+    periode_end = models.DateField()
+    type = models.ForeignKey(BudgetType, related_name='budget_type')
+    currency = models.ForeignKey(CurrencyType)
 
     class Meta:
         app_label = "data"
@@ -88,13 +158,26 @@ class Contact(models.Model):
     email = models.EmailField(blank=True, null=True)
 
     class Meta:
-        app_label = "data"
+        abstract = True
 
 
-class FlowType(models.Model):
-    code = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=15)
-    description = models.TextField(blank=True, null=True)
+class Document(models.Model):
+    """
+    @url        The target URL of the external document, e.g. "http://www.example.org/doc.html".
+    @format     The MIME type of the external document, e.g. "application/pdf". A partial list of MIME types
+                appears at http://iatistandard.org/codelists/file_format
+    @language   The ISO 639 language code for the target document, e.g. "en".
+    """
+    url = models.URLField()
+    format = models.CharField(max_length=55)
+    language = models.CharField(max_length=5)
 
     class Meta:
-        app_label = "data"
+        abstract = True
+
+
+class Website(models.Model):
+    url = models.URLField()
+
+    class Meta:
+        abstract = True
