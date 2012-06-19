@@ -17,7 +17,7 @@ class Publisher(models.Model):
 
     def __unicode__(self):
         if self.org_abbreviate:
-            return "%s - %s" % (self.org_abbreviate, self.org_name)
+            return self.org_abbreviate
         return self.org_name
 
     class Meta:
@@ -59,23 +59,27 @@ class IATIXMLSource(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None):
         # TODO: implement changes/updates
-        if self.ref and self.source_url:
-            if not self.ref[4:] == ".xml":
-                self.ref += ".xml"
-            file_url = self.source_url
-            try:
+        if not self.source_url:
+            print 1
+            if self.ref and self.source_url:
+                if not self.ref[4:] == ".xml":
+                    self.ref += ".xml"
+                file_url = self.source_url
                 try:
-                    # python >= 2.7
-                    import requests
-                    r = requests.get(file_url)
-                    f = StringIO(r.content)
-                except ImportError:
-                    # python <= 2.6
-                    import urllib2
-                    r = urllib2.urlopen(file_url)
-                    f = r
-                file = ContentFile(f.read(), self.ref)
-                self.local_file = file
-                super(IATIXMLSource, self).save(self, force_update=False, using=None)
-            except ValidationError, e:
-                pass
+                    try:
+                        # python >= 2.7
+                        import requests
+                        r = requests.get(file_url)
+                        f = StringIO(r.content)
+                    except ImportError:
+                        # python <= 2.6
+                        import urllib2
+                        r = urllib2.urlopen(file_url)
+                        f = r
+                    file = ContentFile(f.read(), self.ref)
+                    self.local_file = file
+                    super(IATIXMLSource, self).save(self, force_update=False, using=None)
+                except ValidationError, e:
+                    pass
+        print 2
+        super(IATIXMLSource, self).save(self, force_update=False, using=None)

@@ -30,7 +30,7 @@ http://iatiregistry.org/publisher/worldbank
 
 http://iatiregistry.org/publisher/theglobalfund
 
-[ x ] link failed, parse ? (custom upload required)
+[ x ] link failed, parse failed (ValueError: time data '2011-08-09' does not match format '%Y-%m-%d %H:%M:%S')
 
 http://iatiregistry.org/publisher/sida
 
