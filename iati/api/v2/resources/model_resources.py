@@ -41,5 +41,9 @@ class ActivityResource(ModelResource):
             }
 
     def dehydrate(self, bundle):
-        bundle.data['reporting_organisation'] = self.obj_get(iati_identifier=bundle.data['iati_identifier']).reporting_organisation.org_name
+        obj = self.obj_get(iati_identifier=bundle.data['iati_identifier'])
+        bundle.data['reporting_organisation'] = dict(
+            ref=obj.reporting_organisation.ref,
+            org_name=obj.reporting_organisation.org_name,
+        )
         return bundle
