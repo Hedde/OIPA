@@ -39,7 +39,7 @@ class IATIXMLSource(models.Model):
     type = models.IntegerField(choices=TYPE_CHOICES, default=1)
     publisher = models.ForeignKey(Publisher)
     local_file = models.FileField(upload_to=get_upload_path, blank=True, null=True, editable=False)
-    source_url = models.URLField()
+    source_url = models.URLField(unique=True)
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
