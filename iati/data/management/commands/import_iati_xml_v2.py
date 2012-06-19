@@ -3,12 +3,14 @@ from settings import rel
 from datetime import datetime
 from lxml import etree, objectify
 from optparse import make_option
+import types
 
 # Django specific
 from django.core.management import BaseCommand
 from django.db.transaction import commit_on_success
 
 # App specific
+from data.models.constants import ORGANISATION_TYPE_CHOICES
 from data.models.activity import IATIActivity
 from data.models.common import ActivityStatusType
 from data.models.organisation import Organisation
@@ -29,7 +31,10 @@ class Parser(object):
         return datetime.strptime(s, format).date()
 
     def _parse_datetime(self, s, format='%Y-%m-%dT%H:%M:%S'):
-        return datetime.strptime(s, format)
+        try:
+            return datetime.strptime(s, format)
+        except ValueError:
+            return datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
 
 
 class OrganisationParser(Parser):
@@ -53,10 +58,20 @@ class ActivityParser(Parser):
         reporting_organisation_ref = el['reporting-org'].get('ref')
         reporting_organisation_type = el['reporting-org'].get('type')
 
+        if reporting_organisation_type:
+            try:
+                reporting_organisation_type = int(reporting_organisation_type)
+            except ValueError:
+                for k, v in ORGANISATION_TYPE_CHOICES:
+                    if reporting_organisation_type == v:
+                        print k
+                        reporting_organisation_type = k
+
         organisation, created = Organisation.objects.get_or_create(
                                     ref=reporting_organisation_ref,
                                     org_name=reporting_organisation_name
                                 )
+
         if reporting_organisation_type:
             organisation.type = reporting_organisation_type
             organisation.save()

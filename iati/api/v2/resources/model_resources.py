@@ -17,6 +17,15 @@ class OrganisationResource(ModelResource):
         queryset = Organisation.objects.all()
         resource_name = 'organisations'
         serializer = Serializer(formats=['xml', 'json', 'yaml'])
+        filtering = {
+            # example to allow field specific filtering.
+            'org_name': ALL,
+        }
+
+    def dehydrate(self, bundle):
+        bundle.data['type'] = self.obj_get(ref=bundle.data['ref']).get_type_display()
+        return super(OrganisationResource, self).dehydrate(bundle)
+
 
 class ActivityResource(ModelResource):
     class Meta:
