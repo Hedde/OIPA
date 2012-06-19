@@ -19,7 +19,7 @@ from data.models.organisation import Organisation
 class ImportError(Exception):
     pass
 
-
+counter=0
 class Parser(object):
     def __init__(self, tree, force_update=False, verbosity=2):
         self.tree = tree
@@ -87,7 +87,9 @@ class ActivityParser(Parser):
         )
 
         if not self.force_update and iati_activity.date_updated >= date_updated:
-            print "Don't override existing records"
+            global counter
+            counter += 1
+            print str(counter)+ " Don't override existing records"
             return
 
 #        activity.title = unicode(el.title)

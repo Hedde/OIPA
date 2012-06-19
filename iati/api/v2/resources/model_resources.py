@@ -16,10 +16,11 @@ class OrganisationResource(ModelResource):
     class Meta:
         queryset = Organisation.objects.all()
         resource_name = 'organisations'
-        serializer = Serializer(formats=['xml', 'json', 'yaml'])
+        serializer = Serializer(formats=['xml', 'json'])
         filtering = {
             # example to allow field specific filtering.
             'org_name': ALL,
+            'ref': ALL,
         }
 
     def dehydrate(self, bundle):
@@ -34,6 +35,7 @@ class ActivityResource(ModelResource):
 
     @implementation
     http://127.0.0.1:8080/api/v2/activities/?format=json
+    http://127.0.0.1:8080/api/v2/activities/?format=json&reporting_organisation__ref=SE-6
     http://127.0.0.1:8080/api/v2/activities/?format=json&reporting_organisation__org_name__icontains=Oxfam
     """
     reporting_organisation = fields.ForeignKey(OrganisationResource, attribute='reporting_organisation', full=True, null=True)
@@ -41,7 +43,7 @@ class ActivityResource(ModelResource):
     class Meta:
         queryset = IATIActivity.objects.all()
         resource_name = 'activities'
-        serializer = Serializer(formats=['xml', 'json', 'yaml'])
+        serializer = Serializer(formats=['xml', 'json'])
         filtering = {
             # example to allow field specific filtering.
             'activity_status': ALL,
