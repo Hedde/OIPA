@@ -2,11 +2,13 @@
 from django.contrib import admin
 
 # App specific
-from utils.models import IATIXMLSource
+from utils.models import IATIXMLSource, Publisher
 
 
 
 class IATIXMLSourceAdmin(admin.ModelAdmin):
-    list_display = ['ref', 'type', 'local_file', 'source_url', 'date_created', 'date_updated']
+    list_display = ['ref', 'publisher', 'type', 'local_file_exists', 'source_url', 'date_created', 'date_updated']
+    list_filter = ('publisher', 'type')
 
+admin.site.register(Publisher)
 admin.site.register(IATIXMLSource, IATIXMLSourceAdmin)

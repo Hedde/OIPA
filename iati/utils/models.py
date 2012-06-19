@@ -1,13 +1,27 @@
 import os
 
 # Django specific
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import models
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from StringIO import StringIO
 
+
+class Publisher(models.Model):
+    org_name = models.CharField(max_length=255)
+    org_abbreviate = models.CharField(max_length=55, blank=True, null=True)
+
+    def __unicode__(self):
+        if self.org_abbreviate:
+            return self.org_abbreviate
+        return self.org_name
+
+    class Meta:
+        app_label = "utils"
 
 
 def fix(value):
@@ -21,9 +35,9 @@ class IATIXMLSource(models.Model):
         (1, _(u"Activity Files")),
         (2, _(u"Organisation Files")),
     )
-    ref = models.CharField(verbose_name=_(u"Reference"), max_length=55, unique=True)
+    ref = models.CharField(verbose_name=_(u"Reference"), max_length=55)
     type = models.IntegerField(choices=TYPE_CHOICES, default=1)
-    publisher = models.CharField(max_length=100)
+    publisher = models.ForeignKey(Publisher)
     local_file = models.FileField(upload_to=get_upload_path, blank=True, null=True, editable=False)
     source_url = models.URLField()
 
@@ -32,6 +46,13 @@ class IATIXMLSource(models.Model):
 
     class Meta:
         app_label = "utils"
+
+    def local_file_exists(self):
+        if self.local_file:
+            return "<img src='%sadmin/img/icon-yes.gif' alt='True'>" % settings.STATIC_URL
+        return "<img src='%sadmin/img/icon-no.gif' alt='False'>" % settings.STATIC_URL
+    local_file_exists.short_description = _(u"Local copy")
+    local_file_exists.allow_tags = True
 
     def get_absolute_url(self):
         return "/media/%s" % self.local_file
