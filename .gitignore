@@ -2,4 +2,3 @@
 local_settings.py
 migrations
 migrations/*
-
