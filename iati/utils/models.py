@@ -44,15 +44,15 @@ class IATIXMLSource(models.Model):
             file_url = self.source_url
             try:
                 try:
-                    # python 2.7
+                    # python >= 2.7
                     import requests
                     r = requests.get(file_url)
                     f = StringIO(r.content)
                 except ImportError:
-                    # python 2.6
+                    # python <= 2.6
                     import urllib2
                     r = urllib2.urlopen(file_url)
-                    f = StringIO(r)
+                    f = r
                 file = ContentFile(f.read(), self.ref)
                 self.local_file = file
                 super(IATIXMLSource, self).save(self, force_update=False, using=None)

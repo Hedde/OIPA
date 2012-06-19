@@ -90,4 +90,5 @@ INSTALLED_APPS = (
     'piston',
     'tastypie',
     'utils',
+    'south',
 )

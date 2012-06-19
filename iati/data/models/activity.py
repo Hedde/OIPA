@@ -27,10 +27,10 @@ from data.models.constants import TRANSACTION_TYPE_CHOICES
 
 
 class IATIActivity(models.Model):
-    iati_identifier = models.CharField(max_length=50, primary_key=True, unique=True)
-    reporting_organistion = models.ForeignKey(Organisation)
+    iati_identifier = models.CharField(max_length=50, primary_key=True)
+    reporting_organisation = models.ForeignKey(Organisation, to_field='ref')
 
-    activity_status = models.ForeignKey(ActivityStatusType)
+    activity_status = models.ForeignKey(ActivityStatusType, blank=True, null=True)
 
     start_planned = models.DateField(blank=True, null=True)
     start_actual = models.DateField(blank=True, null=True)
@@ -40,13 +40,13 @@ class IATIActivity(models.Model):
     # TODO: Sub-national Geographic Location
 
     collaboration_type = models.ForeignKey(CollaborationType, blank=True, null=True)
-    default_flow_type = models.ForeignKey(FlowType)
+    default_flow_type = models.ForeignKey(FlowType, blank=True, null=True)
     default_aid_type = models.ForeignKey(AidType, blank=True, null=True)
     default_finance_type = models.ForeignKey(FinanceType, blank=True, null=True)
     default_tied_status_type = models.ForeignKey(TiedAidStatusType, blank=True, null=True)
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
-    date_updated = models.DateTimeField(auto_now=True, editable=False)
+    date_updated = models.DateTimeField(editable=False)
 
     def __unicode__(self):
         return self.iati_identifier
