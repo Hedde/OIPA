@@ -29,7 +29,7 @@ class OrganisationResource(ModelResource):
 
 class ActivityResource(ModelResource):
     """
-    @usage
+    @description
     Displays Activities, with nested Organisation
 
     @implementation
