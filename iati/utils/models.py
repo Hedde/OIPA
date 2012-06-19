@@ -17,7 +17,7 @@ class Publisher(models.Model):
 
     def __unicode__(self):
         if self.org_abbreviate:
-            return self.org_abbreviate
+            return "%s - %s" % (self.org_abbreviate, self.org_name)
         return self.org_name
 
     class Meta:

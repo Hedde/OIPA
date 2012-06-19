@@ -54,7 +54,7 @@ http://iatiregistry.org/publisher/aa
 
 http://iatiregistry.org/publisher/globalgiving
 
-[ x ] link failed, parse ? (custom upload required)
+[ x ] link failed, parse (ValueError: time data '2010-07-23T16:18:17.000' does not match format '%Y-%m-%d %H:%M:%S')
 
 http://iatiregistry.org/publisher/finland_mfa
 
