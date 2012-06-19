@@ -28,6 +28,8 @@ class OrganisationResource(ModelResource):
 
 
 class ActivityResource(ModelResource):
+    reporting_organisation = fields.ForeignKey('api.v2.resources.OrganisationResource', attribute='ref', full=True, null=True)
+
     class Meta:
         queryset = IATIActivity.objects.all()
         resource_name = 'activities'
@@ -38,13 +40,6 @@ class ActivityResource(ModelResource):
             'recipient_country_code': ALL
             }
 
-#class SectorResource(ModelResource):
-#    class Meta:
-#        queryset = Sector.objects.all()
-#        resource_name = 'sectors'
-#        serializer = Serializer(formats=['xml', 'json', 'yaml'])
-#
-#    # example to get_field_display usage
-#    def dehydrate(self, bundle):
-#        bundle.data['vocabulary'] = self.obj_get(self).get_vocabulary_display()
-#        return bundle
+    def dehydrate(self, bundle):
+        bundle.data['reporting_organisation'] = self.obj_get(iati_identifier=bundle.data['iati_identifier']).reporting_organisation.org_name
+        return bundle
