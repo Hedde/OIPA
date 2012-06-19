@@ -35,11 +35,11 @@ class IATIXMLSource(models.Model):
         (1, _(u"Activity Files")),
         (2, _(u"Organisation Files")),
     )
-    ref = models.CharField(verbose_name=_(u"Reference"), max_length=55)
+    ref = models.CharField(verbose_name=_(u"Reference"), max_length=55, help_text=_(u"Reference for the XML file. Preferred usage: 'collection' or single country or region name"))
     type = models.IntegerField(choices=TYPE_CHOICES, default=1)
     publisher = models.ForeignKey(Publisher)
     local_file = models.FileField(upload_to=get_upload_path, blank=True, null=True, editable=False)
-    source_url = models.URLField(unique=True)
+    source_url = models.URLField(unique=True, help_text=_(u"Hyperlink to an IATI activity or organisation XML file."))
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
