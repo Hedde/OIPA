@@ -28,7 +28,15 @@ class OrganisationResource(ModelResource):
 
 
 class ActivityResource(ModelResource):
-    reporting_organisation = fields.ForeignKey('api.v2.resources.OrganisationResource', attribute='ref', full=True, null=True)
+    """
+    @usage
+    Displays Activities, with nested Organisation
+
+    @implementation
+    http://127.0.0.1:8080/api/v2/activities/?format=json
+    http://127.0.0.1:8080/api/v2/activities/?format=json&reporting_organisation__org_name__icontains=Oxfam
+    """
+    reporting_organisation = fields.ForeignKey(OrganisationResource, attribute='reporting_organisation', full=True, null=True)
 
     class Meta:
         queryset = IATIActivity.objects.all()
@@ -37,7 +45,8 @@ class ActivityResource(ModelResource):
         filtering = {
             # example to allow field specific filtering.
             'activity_status': ALL,
-            'recipient_country_code': ALL
+            'recipient_country_code': ALL,
+            'reporting_organisation': ALL_WITH_RELATIONS
             }
 
     def dehydrate(self, bundle):
