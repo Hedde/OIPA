@@ -81,11 +81,16 @@ class ActivityParser(Parser):
                     if reporting_organisation_type == v:
                         reporting_organisation_type = k
 
-        organisation, created = Organisation.objects.get_or_create(
-                                    ref=reporting_organisation_ref,
-                                    org_name=reporting_organisation_name,
-                                    type=reporting_organisation_type
-                                )
+        try:
+            organisation = Organisation.objects.get(
+                                                    ref=reporting_organisation_ref
+                                                )
+        except Organisation.DoesNotExist:
+            organisation = Organisation.objects.create(
+                                                    ref=reporting_organisation_ref,
+                                                    org_name=reporting_organisation_name,
+                                                    type=reporting_organisation_type
+                                                )
 
         # get_or_create >
         # IATIActivity(models.Model)
@@ -176,6 +181,8 @@ class ActivityParser(Parser):
         # IATIActivitySector(models.Model)
         # @todo
         # percentage
+
+        iati_activity.iatiactivitysector_set.all().delete()
         for sector in el.sector:
             self._save_sector(sector, iati_activity)
 
@@ -280,7 +287,7 @@ class ActivityParser(Parser):
                     pass
 #                    e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
 #                    raise Exception(e)
-        return iati_activity
+        return
 
 
 
