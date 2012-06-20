@@ -48,6 +48,10 @@ class OrganisationParser(Parser):
 
 
 class ActivityParser(Parser):
+    """
+    XML PARSER IN COMPLIANCE WITH THE IATI ACTIVITY STANDARD
+    source: http://iatistandard.org/activities-standard/overview
+    """
     def parse(self):
         count = len(self.root['iati-activity'])
         i = 0
@@ -58,6 +62,10 @@ class ActivityParser(Parser):
             self._save_activity(el)
 
     def _save_activity(self, el):
+        # ====================================================================
+        # IDENTIFICATION
+        # ====================================================================
+
         # get_or_create >
         # Organisation(models.Model)
         reporting_organisation_name = el['reporting-org']
@@ -68,6 +76,7 @@ class ActivityParser(Parser):
             try:
                 reporting_organisation_type = int(reporting_organisation_type)
             except ValueError:
+                # reverse lookup
                 for k, v in ORGANISATION_TYPE_CHOICES:
                     if reporting_organisation_type == v:
                         reporting_organisation_type = k
@@ -93,23 +102,9 @@ class ActivityParser(Parser):
 #            print "Don't override existing records"
 #            return
 
-        # get_or_create >
-        # ActivityStatusType(models.Model)
-        # @todo
-        # description & language
-        activity_status_name = el['activity-status']
-        activity_status_code = el['activity-status'].get('code')
-
-        if activity_status_name:
-            activity_status, created = ActivityStatusType.objects.get_or_create(
-                                           name=str(activity_status_name).capitalize()
-                                       )
-            if activity_status_code:
-                activity_status.code = activity_status_code
-                activity_status.save()
-
-            iati_activity.activity_status = activity_status
-            iati_activity.save() # todo
+        # ====================================================================
+        # BASIC ACTIVITY INFORMATION
+        # ====================================================================
 
         # get_or_create >
         # IATIActivityTitle(models.Model)
@@ -147,6 +142,35 @@ class ActivityParser(Parser):
                                             )[0]
             activity_description.save()
 
+        # get_or_create >
+        # ActivityStatusType(models.Model)
+        # @todo
+        # description & language
+        activity_status_name = el['activity-status']
+        activity_status_code = el['activity-status'].get('code')
+
+        if activity_status_name:
+            activity_status, created = ActivityStatusType.objects.get_or_create(
+                name=str(activity_status_name).capitalize()
+            )
+            if activity_status_code:
+                activity_status.code = activity_status_code
+                activity_status.save()
+
+            iati_activity.activity_status = activity_status
+            iati_activity.save() # todo
+
+        # ====================================================================
+        # PARTICIPATING ORGANISATIONS
+        # ====================================================================
+
+        # ====================================================================
+        # GEOPOLITICAL INFORMATION
+        # ====================================================================
+
+        # ====================================================================
+        # CLASSIFICATIONS
+        # ====================================================================
 
         # get_or_create >
         # IATIActivitySector(models.Model)
@@ -154,8 +178,6 @@ class ActivityParser(Parser):
         # percentage
         for sector in el.sector:
             self._save_sector(sector, iati_activity)
-
-
 
 
 #        activity.flow_type = FlowType(code=1, name='test') # HARD CODE
@@ -238,7 +260,12 @@ class ActivityParser(Parser):
         if iati_activity_sector_vocabulary_type:
             try:
                 iati_activity_sector_vocabulary_type = int(iati_activity_sector_vocabulary_type)
+                activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
+                                                      code=iati_activity_sector_vocabulary_type
+                                                  )[0]
+                activity_sector.save()
             except ValueError:
+                # complex lookup
                 import itertools
                 match = None
                 for match in itertools.ifilter(lambda x: x[0] == iati_activity_sector_vocabulary_type, VOCABULARY_CHOICES_MAP):
