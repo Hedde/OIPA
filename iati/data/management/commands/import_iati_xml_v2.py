@@ -15,11 +15,13 @@ from data.models.constants import VOCABULARY_CHOICES_MAP
 from data.models.activity import IATIActivity
 from data.models.activity import IATIActivityTitle
 from data.models.activity import IATIActivityDescription
+from data.models.activity import IATIActivityContact
 from data.models.activity import IATIActivitySector
 from data.models.common import ActivityStatusType
 from data.models.common import VocabularyType
 from data.models.common import Language
 from data.models.organisation import Organisation
+from data.models.organisation import ParticipatingOrganisation
 
 
 class ImportError(Exception):
@@ -165,9 +167,57 @@ class ActivityParser(Parser):
             iati_activity.activity_status = activity_status
             iati_activity.save() # todo
 
+        for activity_date in el['activity-date']:
+            if activity_date.get('type') == 'start-planned':
+                iati_activity.start_planned = activity_date.get('iso-date')
+            elif activity_date.get('type') == 'start-actual':
+                iati_activity.start_actual = activity_date.get('iso-date')
+            elif activity_date.get('type') == 'end-planned':
+                iati_activity.end_planned = activity_date.get('iso-date')
+            elif activity_date.get('type') == 'end-actual':
+                iati_activity.end_actual = activity_date.get('iso-date')
+            iati_activity.save()
+
+        iati_activity.iatiactivitycontact_set.all().delete()
+        iati_activity_contact = IATIActivityContact.objects.create(
+                                    iati_activity=iati_activity
+                                )
+        if hasattr(el, 'contact-info'):
+            if hasattr(el['contact-info'], 'organisation'):
+                iati_activity_contact.organisation = el['contact-info']['organisation']
+            if hasattr(el['contact-info'], 'telephone'):
+                iati_activity_contact.telephone = el['contact-info']['telephone']
+            if hasattr(el['contact-info'], 'email'):
+                iati_activity_contact.email = el['contact-info']['email']
+            if hasattr(el['contact-info'], 'mailing-address'):
+                iati_activity_contact.mailing_address = el['contact-info']['mailing-address']
+            iati_activity_contact.save()
+
+
         # ====================================================================
         # PARTICIPATING ORGANISATIONS
         # ====================================================================
+
+        iati_activity.participatingorganisation_set.all().delete()
+        participating_organisation = ParticipatingOrganisation.objects.create(
+                                         iati_activity=iati_activity
+                                     )
+        for participating_org in el['participating-org']:
+            participating_organisation.org_name = str(participating_org) # TODO trim spaces
+            participating_organisation.ref = participating_org.get('ref')
+            participating_organisation.role = participating_org.get('role')
+
+            participating_organisation_type = participating_org.get('type')
+            if participating_organisation_type:
+                try:
+                    participating_organisation.type = int(participating_organisation_type)
+                except ValueError:
+                    # reverse lookup
+                    for k, v in ORGANISATION_TYPE_CHOICES:
+                        if participating_organisation_type == v:
+                            participating_organisation.type = k
+                participating_organisation.save()
+
 
         # ====================================================================
         # GEOPOLITICAL INFORMATION
@@ -185,6 +235,22 @@ class ActivityParser(Parser):
         iati_activity.iatiactivitysector_set.all().delete()
         for sector in el.sector:
             self._save_sector(sector, iati_activity)
+
+        # ====================================================================
+        # FINANCIAL
+        # ====================================================================
+
+        # ====================================================================
+        # TRANSACTION
+        # ====================================================================
+
+        # ====================================================================
+        # RELATED DOCUMENTS
+        # ====================================================================
+
+        # ====================================================================
+        # PERFORMANCE
+        # ====================================================================
 
 
 #        activity.flow_type = FlowType(code=1, name='test') # HARD CODE

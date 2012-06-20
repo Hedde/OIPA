@@ -18,12 +18,19 @@ class Organisation(models.Model):
         app_label = "data"
 
 
-class ParticipatingOrganisation(Organisation):
+class ParticipatingOrganisation(models.Model):
     """
     Note: participationOrg field NOT YET described in activity standaard
     """
     iati_activity = models.ForeignKey('IATIActivity') # import as string to avoid import circle
+    ref = models.CharField(max_length=25)
+    type = models.IntegerField(choices=ORGANISATION_TYPE_CHOICES, blank=True, null=True)
+    org_name = models.CharField(max_length=255)
+    org_name_lang = models.CharField(max_length=255, blank=True, null=True)
     role = models.CharField(max_length=500)
+
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    date_updated = models.DateTimeField(auto_now=True, editable=False)
 
     def __unicode__(self):
         return self.org_name

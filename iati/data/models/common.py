@@ -125,23 +125,12 @@ class Budget(BudgetType):
         app_label = "data"
 
 
-class Address(models.Model):
-    street_name = models.CharField(max_length=255, blank=True, null=True)
-    street_number = models.IntegerField(blank=True, null=True)
-    zip_code = models.CharField(max_length=50, blank=True, null=True)
-    city = models.CharField(max_length=50, blank=True, null=True)
-    country = models.ForeignKey(Country, blank=True, null=True)
-
-    class Meta:
-        app_label = "data"
-
-
 class Contact(models.Model):
     organisation = models.CharField(max_length=255, blank=True, null=True)
     person_name = models.CharField(max_length=255, blank=True, null=True)
-    address = models.ForeignKey(Address, blank=True, null=True)
-    phone = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    telephone = models.CharField(max_length=50, blank=True, null=True)
+    mailing_address = models.CharField(max_length=255)
 
     class Meta:
         abstract = True
