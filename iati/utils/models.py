@@ -58,28 +58,28 @@ class IATIXMLSource(models.Model):
         return "/media/%s" % self.local_file
 
     def save(self, force_insert=False, force_update=False, using=None):
-        # TODO: implement changes/updates
-        if not self.source_url:
-            print 1
-            if self.ref and self.source_url:
-                if not self.ref[4:] == ".xml":
-                    self.ref += ".xml"
-                file_url = self.source_url
+        """
+        @todo
+        Implement updating, file deleting etc.
+        """
+        if self.id is not None:
+            if not self.ref[4:] == ".xml":
+                self.ref += ".xml"
+            file_url = self.source_url
+            try:
                 try:
-                    try:
-                        # python >= 2.7
-                        import requests
-                        r = requests.get(file_url)
-                        f = StringIO(r.content)
-                    except ImportError:
-                        # python <= 2.6
-                        import urllib2
-                        r = urllib2.urlopen(file_url)
-                        f = r
-                    file = ContentFile(f.read(), self.ref)
-                    self.local_file = file
-                    super(IATIXMLSource, self).save(self, force_update=False, using=None)
-                except ValidationError, e:
-                    pass
-        print 2
-        super(IATIXMLSource, self).save(self, force_update=False, using=None)
+                    # python >= 2.7
+                    import requests
+                    r = requests.get(file_url)
+                    f = StringIO(r.content)
+                except ImportError:
+                    # python <= 2.6
+                    import urllib2
+                    r = urllib2.urlopen(file_url)
+                    f = r
+                file = ContentFile(f.read(), self.ref)
+                self.local_file = file
+                super(IATIXMLSource, self).save(self, force_update=False, using=None)
+            except ValidationError, e:
+                pass #TODO
+        super(IATIXMLSource, self).save_base()

@@ -12,6 +12,8 @@ from django.db.transaction import commit_on_success
 # App specific
 from data.models.constants import ORGANISATION_TYPE_CHOICES
 from data.models.activity import IATIActivity
+from data.models.activity import IATIActivityTitle
+from data.models.activity import IATIActivityDescription
 from data.models.common import ActivityStatusType
 from data.models.organisation import Organisation
 
@@ -19,7 +21,7 @@ from data.models.organisation import Organisation
 class ImportError(Exception):
     pass
 
-counter=0
+
 class Parser(object):
     def __init__(self, tree, force_update=False, verbosity=2):
         self.tree = tree
@@ -52,8 +54,11 @@ class ActivityParser(Parser):
             self._save_activity(el)
 
     def _save_activity(self, el):
-
-        # Get or create Organisation
+        # get_or_create >
+        # Organisation(models.Model)
+        #
+        # required >
+        # TRUE
         reporting_organisation_name = el['reporting-org']
         reporting_organisation_ref = el['reporting-org'].get('ref')
         reporting_organisation_type = el['reporting-org'].get('type')
@@ -64,35 +69,78 @@ class ActivityParser(Parser):
             except ValueError:
                 for k, v in ORGANISATION_TYPE_CHOICES:
                     if reporting_organisation_type == v:
-                        print k
                         reporting_organisation_type = k
 
         organisation, created = Organisation.objects.get_or_create(
                                     ref=reporting_organisation_ref,
-                                    org_name=reporting_organisation_name
+                                    org_name=reporting_organisation_name,
+                                    type=reporting_organisation_type
                                 )
 
-        if reporting_organisation_type:
-            organisation.type = reporting_organisation_type
-            organisation.save()
-
-        # Get or create IATIActivity
-        iati_identifier = el['iati-identifier']
+        # get_or_create >
+        # IATIActivity(models.Model)
+        #
+        # required >
+        # TRUE
+        iati_identifier = str(el['iati-identifier'])
         date_updated = self._parse_datetime(el.get('last-updated-datetime'))
 
         iati_activity, created = IATIActivity.objects.get_or_create(
-            iati_identifier=str(iati_identifier),
-            reporting_organisation=organisation,
-            date_updated=date_updated
-        )
+                                     iati_identifier=iati_identifier,
+                                     reporting_organisation=organisation,
+                                     date_updated=date_updated
+                                 )
 
-        if not self.force_update and iati_activity.date_updated >= date_updated:
-            global counter
-            counter += 1
-            print str(counter)+ " Don't override existing records"
-            return
+#        if not self.force_update and iati_activity.date_updated >= date_updated:
+#            print "Don't override existing records"
+#            return
 
-#        activity.title = unicode(el.title)
+        # get_or_create >
+        # ActivityStatusType(models.Model)
+        #
+        # required >
+        # FALSE
+        #
+        # @todo
+        # description & language
+        activity_status_name = el['activity-status']
+        activity_status_code = el['activity-status'].get('code')
+
+        if activity_status_name:
+            activity_status, created = ActivityStatusType.objects.get_or_create(
+                                           name=str(activity_status_name).capitalize()
+                                       )
+            if activity_status_code:
+                activity_status.code = activity_status_code
+                activity_status.save()
+
+            iati_activity.activity_status = activity_status
+            iati_activity.save() # todo
+
+        # get_or_create >
+        # IATIActivityTitle(models.Model)
+        #
+        # required >
+        # TRUE
+        iati_activity_title = unicode(el.title)
+
+        activity_title, created = IATIActivityTitle.objects.get_or_create(
+                                      iati_activity=iati_activity,
+                                      title=iati_activity_title
+                                  )
+
+        # get_or_create >
+        # IATIActivityDescription(models.Model)
+        #
+        # required >
+        # TRUE
+        iati_activity_description = unicode(el.description)
+
+        activity_description, created = IATIActivityDescription.objects.get_or_create(
+                                            iati_activity=iati_activity,
+                                            title=iati_activity_description
+                                        )
+
 #        activity.description = unicode(el.description)
 #        activity.sector = unicode(el.sector)
 #        activity.sector_code = el.sector.get('code')
@@ -199,12 +247,13 @@ class Command(BaseCommand):
     @commit_on_success
     def save(self, tree, force_update=False, verbosity=2):
         """
-        TODO: builtin availability check for all required fields
+        @todo
+        > builtin availability check for all required fields
+        > commit_on_succes / transaction save impl
         """
         try:
             parser_cls = self.parsers[tree.getroot().tag]
             parser_cls(tree, force_update, verbosity).parse()
-
         except KeyError:
             raise ImportError('Undefined document structure')
 

@@ -80,7 +80,10 @@ class CurrencyType(CommonType):
         app_label = "data"
 
 
-class ActivityStatusType(CommonType):
+class ActivityStatusType(models.Model):
+    code = models.IntegerField(max_length=8, unique=True, blank=True, null=True)
+    name = models.CharField(max_length=15)
+    description = models.TextField(blank=True, null=True)
     language = models.ForeignKey(Country, blank=True, null=True)
 
     class Meta:

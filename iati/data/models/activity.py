@@ -59,13 +59,18 @@ class IATIActivity(models.Model):
 class IATIActivityTitle(models.Model):
     iati_activity = models.ForeignKey(IATIActivity)
     title = models.CharField(max_length=255)
-    language = models.ForeignKey(Country)
+    language = models.ForeignKey(Country, blank=True, null=True)
 
+    class Meta:
+        app_label = "data"
 
 class IATIActivityDescription(models.Model):
     iati_activity = models.ForeignKey(IATIActivity)
-    description = models.TextField()
-    language = models.ForeignKey(Country)
+    description = models.TextField(blank=True, null=True)
+    language = models.ForeignKey(Country, blank=True, null=True)
+
+    class Meta:
+        app_label = "data"
 
 
 class OtherIdentifier(models.Model):
