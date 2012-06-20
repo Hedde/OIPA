@@ -152,30 +152,12 @@ class ActivityParser(Parser):
         # IATIActivitySector(models.Model)
         # @todo
         # percentage
-        iati_activity_sector_code = el['sector'].get('code')
-        iati_activity_sector_vocabulary_type = str(el['sector'].get('vocabulary')).replace(' ', '_').replace('-', '_')
-
-        activity_sector, created = IATIActivitySector.objects.get_or_create(
-                                       iati_activity=iati_activity,
-                                       code=iati_activity_sector_code
-                                   )
-
-        if iati_activity_sector_vocabulary_type:
-            try:
-                iati_activity_sector_vocabulary_type = int(iati_activity_sector_vocabulary_type)
-            except ValueError:
-                for k, v in VOCABULARY_CHOICES_MAP:
-                    if k == iati_activity_sector_vocabulary_type:
-                        iati_activity_sector_vocabulary_type = v
-
-            activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
-                                                  code=iati_activity_sector_vocabulary_type
-                                              )[0]
-            activity_sector.save()
+        for sector in el.sector:
+            self._save_sector(sector, iati_activity)
 
 
-#        activity.sector = unicode(el.sector)
-#        activity.sector_code = el.sector.get('code')
+
+
 #        activity.flow_type = FlowType(code=1, name='test') # HARD CODE
 #
 #        for item in el['activity-date']:
@@ -243,6 +225,36 @@ class ActivityParser(Parser):
 #        tr.transaction_date = self._parse_date(el['transaction-date'].get('iso-date'))
 #        tr.save()
 #        return tr
+
+    def _save_sector(self, sector, iati_activity):
+        iati_activity_sector_code = sector.get('code')
+        iati_activity_sector_vocabulary_type = str(sector.get('vocabulary')).replace(' ', '_').replace('-', '_')
+
+        activity_sector, created = IATIActivitySector.objects.get_or_create(
+                                       iati_activity=iati_activity,
+                                       code=iati_activity_sector_code
+                                   )
+
+        if iati_activity_sector_vocabulary_type:
+            try:
+                iati_activity_sector_vocabulary_type = int(iati_activity_sector_vocabulary_type)
+            except ValueError:
+                import itertools
+                match = None
+                for match in itertools.ifilter(lambda x: x[0] == iati_activity_sector_vocabulary_type, VOCABULARY_CHOICES_MAP):
+                    match = match
+                if match:
+                    iati_activity_sector_vocabulary_type = match[1]
+                    activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
+                                                          code=iati_activity_sector_vocabulary_type
+                                                      )[0]
+                    activity_sector.save()
+                else:
+                    pass
+#                    e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
+#                    raise Exception(e)
+        return iati_activity
+
 
 
 class Command(BaseCommand):

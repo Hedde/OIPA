@@ -108,7 +108,7 @@ class BudgetType(CommonType):
 
 
 class Sector(models.Model):
-    code = models.IntegerField(max_length=5)
+    code = models.CharField(max_length=55)
     vocabulary_type = models.ForeignKey(VocabularyType, blank=True, null=True)
 
     class Meta:
