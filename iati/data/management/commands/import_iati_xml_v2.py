@@ -138,7 +138,7 @@ class ActivityParser(Parser):
 
         activity_description, created = IATIActivityDescription.objects.get_or_create(
                                             iati_activity=iati_activity,
-                                            title=iati_activity_description
+                                            description=iati_activity_description
                                         )
 
 #        activity.description = unicode(el.description)

@@ -20,6 +20,13 @@ TRANSACTION_TYPE_CHOICES = (
     (R, _(u"Reimbursement")),
 )
 
+GENERAL, OBJECTIVES, TARGET_GROUPS = range(1, 4)
+DESCRIPTION_TYPE_CHOICES = (
+    (GENERAL, _(u"Long description of the activity with no particular structure")),
+    (OBJECTIVES, _(u"Objectives for the activity, for example from a logical framework")),
+    (TARGET_GROUPS, _(u"Statement of groups targeted to benefit from the activity")),
+)
+
 TIED_AID_CHOICES = (
     (3, _(u"Partially")),
     (4, _(u"Tied")),

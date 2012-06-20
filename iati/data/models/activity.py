@@ -24,6 +24,7 @@ from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
 from data.models.constants import RELATED_CHOICES
 from data.models.constants import TIED_AID_CHOICES
 from data.models.constants import TRANSACTION_TYPE_CHOICES
+from data.models.constants import DESCRIPTION_TYPE_CHOICES
 
 
 class IATIActivity(models.Model):
@@ -64,9 +65,11 @@ class IATIActivityTitle(models.Model):
     class Meta:
         app_label = "data"
 
+
 class IATIActivityDescription(models.Model):
     iati_activity = models.ForeignKey(IATIActivity)
     description = models.TextField(blank=True, null=True)
+    type = models.CharField(max_length=2, choices=DESCRIPTION_TYPE_CHOICES, blank=True, null=True)
     language = models.ForeignKey(Country, blank=True, null=True)
 
     class Meta:
