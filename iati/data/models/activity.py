@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 # App specific
 from data.models.common import Contact
 from data.models.common import Country
+from data.models.common import Language
 from data.models.common import CollaborationType
 from data.models.common import FlowType
 from data.models.common import AidType
@@ -60,7 +61,7 @@ class IATIActivity(models.Model):
 class IATIActivityTitle(models.Model):
     iati_activity = models.ForeignKey(IATIActivity)
     title = models.CharField(max_length=255)
-    language = models.ForeignKey(Country, blank=True, null=True)
+    language = models.ForeignKey(Language, blank=True, null=True)
 
     class Meta:
         app_label = "data"
@@ -70,7 +71,7 @@ class IATIActivityDescription(models.Model):
     iati_activity = models.ForeignKey(IATIActivity)
     description = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=2, choices=DESCRIPTION_TYPE_CHOICES, blank=True, null=True)
-    language = models.ForeignKey(Country, blank=True, null=True)
+    language = models.ForeignKey(Language, blank=True, null=True)
 
     class Meta:
         app_label = "data"
@@ -105,7 +106,7 @@ class IATIActivityCountry(Country):
 
 class IATIActivitySector(Sector):
     iati_activity = models.ForeignKey(IATIActivity)
-    percentage = models.IntegerField()
+    percentage = models.IntegerField(blank=True, null=True)
 
     class Meta:
         app_label = "data"

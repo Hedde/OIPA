@@ -76,3 +76,16 @@ COUNTRY_ISO_MAP = {u'WF': _(u'Wallis and Futuna Islands'), u'JP': _(u'Japan'), u
 COUNTRIES_TUPLE = (
     COUNTRY_ISO_MAP.items()
 )
+
+VOCABULARY_CHOICES_MAP = zip(['ADT', 'COFOG', 'DAC', 'DAC_3', 'ISO', 'NTEE', 'RO', 'WB'], range(1, 9))
+ADT, COFOG, DAC, DAC_3, ISO, NTEE, RO, WB = range(1, 9)
+VOCABULARY_CHOICES = (
+    (ADT, _(u"AidData")),
+    (COFOG, _(u"Classification of the Functions of Government (UN)")),
+    (DAC, _(u"Development Assistance Committee")),
+    (DAC_3, _(u"OECD Development Assistance Committee 3 digit codes")),
+    (ISO, _(u"International Organization for Standardization")),
+    (NTEE, _(u"National Taxonomy for Exempt Entities (USA)")),
+    (RO, _(u"Reporting Organisation (i.e. maintained by the organisation referred to in the element.")),
+    (WB, _(u"World Bank")),
+)

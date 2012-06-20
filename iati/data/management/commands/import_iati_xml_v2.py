@@ -11,10 +11,14 @@ from django.db.transaction import commit_on_success
 
 # App specific
 from data.models.constants import ORGANISATION_TYPE_CHOICES
+from data.models.constants import VOCABULARY_CHOICES_MAP
 from data.models.activity import IATIActivity
 from data.models.activity import IATIActivityTitle
 from data.models.activity import IATIActivityDescription
+from data.models.activity import IATIActivitySector
 from data.models.common import ActivityStatusType
+from data.models.common import VocabularyType
+from data.models.common import Language
 from data.models.organisation import Organisation
 
 
@@ -56,9 +60,6 @@ class ActivityParser(Parser):
     def _save_activity(self, el):
         # get_or_create >
         # Organisation(models.Model)
-        #
-        # required >
-        # TRUE
         reporting_organisation_name = el['reporting-org']
         reporting_organisation_ref = el['reporting-org'].get('ref')
         reporting_organisation_type = el['reporting-org'].get('type')
@@ -79,9 +80,6 @@ class ActivityParser(Parser):
 
         # get_or_create >
         # IATIActivity(models.Model)
-        #
-        # required >
-        # TRUE
         iati_identifier = str(el['iati-identifier'])
         date_updated = self._parse_datetime(el.get('last-updated-datetime'))
 
@@ -97,10 +95,6 @@ class ActivityParser(Parser):
 
         # get_or_create >
         # ActivityStatusType(models.Model)
-        #
-        # required >
-        # FALSE
-        #
         # @todo
         # description & language
         activity_status_name = el['activity-status']
@@ -119,29 +113,67 @@ class ActivityParser(Parser):
 
         # get_or_create >
         # IATIActivityTitle(models.Model)
-        #
-        # required >
-        # TRUE
+        # @todo
+        # type
         iati_activity_title = unicode(el.title)
+        iati_activity_title_type = el['title'].get('type')
+        iati_activity_title_language = str(el['title'].get('{http://www.w3.org/XML/1998/namespace}lang')).lower()
 
         activity_title, created = IATIActivityTitle.objects.get_or_create(
                                       iati_activity=iati_activity,
                                       title=iati_activity_title
                                   )
+        if iati_activity_title_language:
+            activity_title.language = Language.objects.get_or_create(
+                                          code=iati_activity_title_language
+                                      )[0]
+            activity_title.save()
 
         # get_or_create >
         # IATIActivityDescription(models.Model)
-        #
-        # required >
-        # TRUE
+        # @todo
+        # type
         iati_activity_description = unicode(el.description)
+        iati_activity_description_type = el['description'].get('type')
+        iati_activity_description_language = str(el['description'].get('{http://www.w3.org/XML/1998/namespace}lang')).lower()
 
         activity_description, created = IATIActivityDescription.objects.get_or_create(
                                             iati_activity=iati_activity,
                                             description=iati_activity_description
                                         )
+        if iati_activity_description_language:
+            activity_description.language = Language.objects.get_or_create(
+                                                code=iati_activity_description_language
+                                            )[0]
+            activity_description.save()
 
-#        activity.description = unicode(el.description)
+
+        # get_or_create >
+        # IATIActivitySector(models.Model)
+        # @todo
+        # percentage
+        iati_activity_sector_code = el['sector'].get('code')
+        iati_activity_sector_vocabulary_type = str(el['sector'].get('vocabulary')).replace(' ', '_').replace('-', '_')
+
+        activity_sector, created = IATIActivitySector.objects.get_or_create(
+                                       iati_activity=iati_activity,
+                                       code=iati_activity_sector_code
+                                   )
+
+        if iati_activity_sector_vocabulary_type:
+            try:
+                iati_activity_sector_vocabulary_type = int(iati_activity_sector_vocabulary_type)
+            except ValueError:
+                for k, v in VOCABULARY_CHOICES_MAP:
+                    if k == iati_activity_sector_vocabulary_type:
+                        iati_activity_sector_vocabulary_type = v
+
+            activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
+                                                  code=iati_activity_sector_vocabulary_type
+                                              )[0]
+            activity_sector.save()
+
+
 #        activity.sector = unicode(el.sector)
 #        activity.sector_code = el.sector.get('code')
 #        activity.flow_type = FlowType(code=1, name='test') # HARD CODE
