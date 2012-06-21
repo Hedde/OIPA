@@ -62,10 +62,10 @@ class ActivityResource(ModelResource):
         )
         titles = {}
         for title in obj.iatiactivitytitle_set.all():
-            titles[str(title.language.code)] = str(title.title)
+            titles[title.language.code] = title.title
         bundle.data['title'] = titles
         descriptions = {}
         for description in obj.iatiactivitydescription_set.all():
-            descriptions[str(description.language.code)] = unicode(description.description)
+            descriptions[description.language.code] = description.description
         bundle.data['description'] = descriptions
         return bundle

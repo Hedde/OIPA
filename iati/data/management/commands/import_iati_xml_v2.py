@@ -117,7 +117,7 @@ class ActivityParser(Parser):
         # IATIActivityTitle(models.Model)
         # @todo
         # type
-        iati_activity_title = unicode(el.title)
+        iati_activity_title = unicode(el.title).encode('UTF-8')
         iati_activity_title_type = el['title'].get('type')
         iati_activity_title_language = str(el['title'].get('{http://www.w3.org/XML/1998/namespace}lang')).lower()
 
@@ -135,7 +135,7 @@ class ActivityParser(Parser):
         # IATIActivityDescription(models.Model)
         # @todo
         # type
-        iati_activity_description = unicode(el.description)
+        iati_activity_description = unicode(el.description).encode('UTF-8')
         iati_activity_description_type = el['description'].get('type')
         iati_activity_description_language = str(el['description'].get('{http://www.w3.org/XML/1998/namespace}lang')).lower()
 
