@@ -179,10 +179,10 @@ class ActivityParser(Parser):
             iati_activity.save()
 
         iati_activity.iatiactivitycontact_set.all().delete()
-        iati_activity_contact = IATIActivityContact.objects.create(
-                                    iati_activity=iati_activity
-                                )
         if hasattr(el, 'contact-info'):
+            iati_activity_contact = IATIActivityContact.objects.create(
+                                        iati_activity=iati_activity
+                                    )
             if hasattr(el['contact-info'], 'organisation'):
                 iati_activity_contact.organisation = el['contact-info']['organisation']
             if hasattr(el['contact-info'], 'telephone'):
@@ -198,26 +198,14 @@ class ActivityParser(Parser):
         # PARTICIPATING ORGANISATIONS
         # ====================================================================
 
+        # get_or_create >
+        # ParticipatingOrganisation(models.Model)
+        # @todo
+        # org_name_lang
+
         iati_activity.participatingorganisation_set.all().delete()
-        participating_organisation = ParticipatingOrganisation.objects.create(
-                                         iati_activity=iati_activity
-                                     )
         for participating_org in el['participating-org']:
-            participating_organisation.org_name = str(participating_org) # TODO trim spaces
-            participating_organisation.ref = participating_org.get('ref')
-            participating_organisation.role = participating_org.get('role')
-
-            participating_organisation_type = participating_org.get('type')
-            if participating_organisation_type:
-                try:
-                    participating_organisation.type = int(participating_organisation_type)
-                except ValueError:
-                    # reverse lookup
-                    for k, v in ORGANISATION_TYPE_CHOICES:
-                        if participating_organisation_type == v:
-                            participating_organisation.type = k
-                participating_organisation.save()
-
+            self._save_participating_org(participating_org, iati_activity)
 
         # ====================================================================
         # GEOPOLITICAL INFORMATION
@@ -292,14 +280,24 @@ class ActivityParser(Parser):
 #        for item in el['policy-marker']:
 #            self._save_policy_marker(item, activity)
 #
-#    def _save_participating_org(self, el, activity):
-#        if el.get('type'):
-#            po = ParticipatingOrganisation(activity=activity)
-#            po.name = unicode(el)
-#            po.role = el.get('role')
-#            po.type = el.get('type')
-#            po.ref = el.get('ref')
-#            po.save()
+    def _save_participating_org(self, participating_org, iati_activity):
+        participating_organisation = ParticipatingOrganisation.objects.create(
+            iati_activity=iati_activity
+        )
+        participating_organisation.org_name = str(participating_org) # TODO trim spaces
+        participating_organisation.ref = participating_org.get('ref')
+        participating_organisation.role = participating_org.get('role')
+
+        participating_organisation_type = participating_org.get('type')
+        if participating_organisation_type:
+            try:
+                participating_organisation.type = int(participating_organisation_type)
+            except ValueError:
+                # reverse lookup
+                for k, v in ORGANISATION_TYPE_CHOICES:
+                    if participating_organisation_type == v:
+                        participating_organisation.type = k
+            participating_organisation.save()
 #
 #    def _save_policy_marker(self, el, activity):
 #        pm = PolicyMarker(activity=activity)
