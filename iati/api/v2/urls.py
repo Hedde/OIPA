@@ -4,11 +4,12 @@ from tastypie.api import Api
 
 from api.v2.resources.model_resources import OrganisationResource
 from api.v2.resources.model_resources import ActivityResource
-#from api.v2.resources.model_resources import SectorResource
+from api.v2.resources.model_resources import CountryResource
 
 v2_api = Api(api_name='v2')
 v2_api.register(OrganisationResource())
 v2_api.register(ActivityResource())
+v2_api.register(CountryResource())
 #v2_api.register(SectorResource())
 
 urlpatterns = patterns('',

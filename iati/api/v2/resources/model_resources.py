@@ -9,7 +9,9 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 # Data specific
 from data.models.activity import IATIActivity
+from data.models.activity import IATIActivityCountry
 from data.models.activity import IATIActivityTitle
+from data.models.common import Country
 from data.models.organisation import Organisation
 
 
@@ -31,6 +33,18 @@ class OrganisationResource(ModelResource):
         return super(OrganisationResource, self).dehydrate(bundle)
 
 
+class CountryResource(ModelResource):
+    class Meta:
+        queryset = Country.objects.all()
+        resource_name = 'countries'
+        serializer = Serializer(formats=['xml', 'json'])
+
+    def dehydrate(self, bundle):
+        obj = self.obj_get(iso=bundle.data['iso'])
+        bundle.data['country'] = obj.get_iso_display()
+        return bundle
+
+
 class ActivityResource(ModelResource):
     """
     @description
@@ -50,7 +64,6 @@ class ActivityResource(ModelResource):
         filtering = {
             # example to allow field specific filtering.
             'activity_status': ALL,
-            'recipient_country_code': ALL,
             'reporting_organisation': ALL_WITH_RELATIONS
             }
 
@@ -59,6 +72,10 @@ class ActivityResource(ModelResource):
         bundle.data['reporting_organisation'] = dict(
             ref=obj.reporting_organisation.ref,
             org_name=obj.reporting_organisation.org_name,
+        )
+        bundle.data['recipient_country'] = dict(
+            country=obj.iatiactivitycountry_set.all()[0].country.get_iso_display(),
+            iso=obj.iatiactivitycountry_set.all()[0].country.iso
         )
         titles = {}
         for title in obj.iatiactivitytitle_set.all():
