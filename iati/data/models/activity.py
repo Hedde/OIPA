@@ -89,17 +89,19 @@ class OtherIdentifier(models.Model):
     owner_name = models.CharField(max_length=255)
 
 
-class IATIActivityRegion(Region):
+class IATIActivityRegion(models.Model):
     iati_activity = models.ForeignKey(IATIActivity)
-    percentage = models.IntegerField()
+    region = models.ForeignKey(Region)
+    percentage = models.IntegerField(blank=True, null=True)
 
     class Meta:
         app_label = "data"
 
 
-class IATIActivityCountry(Country):
+class IATIActivityCountry(models.Model):
     iati_activity = models.ForeignKey(IATIActivity)
-    percentage = models.IntegerField()
+    country = models.ForeignKey(Country)
+    percentage = models.IntegerField(blank=True, null=True)
 
     class Meta:
         app_label = "data"

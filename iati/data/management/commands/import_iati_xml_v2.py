@@ -3,21 +3,23 @@ from settings import rel
 from datetime import datetime
 from lxml import etree, objectify
 from optparse import make_option
-import types
+import itertools
 
 # Django specific
 from django.core.management import BaseCommand
 from django.db.transaction import commit_on_success
 
 # App specific
+from data.models.constants import COUNTRIES_TUPLE
 from data.models.constants import ORGANISATION_TYPE_CHOICES
 from data.models.constants import VOCABULARY_CHOICES_MAP
 from data.models.activity import IATIActivity
 from data.models.activity import IATIActivityTitle
 from data.models.activity import IATIActivityDescription
 from data.models.activity import IATIActivityContact
+from data.models.activity import IATIActivityCountry
 from data.models.activity import IATIActivitySector
-from data.models.common import ActivityStatusType
+from data.models.common import ActivityStatusType, Country
 from data.models.common import VocabularyType
 from data.models.common import Language
 from data.models.organisation import Organisation
@@ -213,6 +215,15 @@ class ActivityParser(Parser):
         # GEOPOLITICAL INFORMATION
         # ====================================================================
 
+        # get_or_create >
+        # IATIActivityCountry(models.Model)
+        # @todo
+        # lang
+
+        iati_activity.iatiactivitycountry_set.all().delete()
+        for recipient_country in el['recipient-country']:
+            self._save_recipient_country(recipient_country, iati_activity)
+
         # ====================================================================
         # CLASSIFICATIONS
         # ====================================================================
@@ -282,6 +293,23 @@ class ActivityParser(Parser):
 #        for item in el['policy-marker']:
 #            self._save_policy_marker(item, activity)
 #
+
+    def _save_recipient_country(self, recipient_country, iati_activity):
+        match = None
+        for match in itertools.ifilter(lambda x: x[0] == recipient_country.get('code'), COUNTRIES_TUPLE):
+            match = match[0]
+        if match:
+            IATIActivityCountry.objects.create(
+                iati_activity=iati_activity,
+                country=Country.objects.get_or_create(
+                                            iso=match
+                                        )[0]
+            )
+        else:
+#            e = "ValueError: Unsupported country_iso '"+str(recipient_country.get('code'))+"' in COUNTRIES_TUPLE"
+#            raise Exception(e)
+            pass
+
     def _save_participating_org(self, participating_org, iati_activity):
         participating_organisation = ParticipatingOrganisation.objects.create(
             iati_activity=iati_activity
@@ -339,7 +367,6 @@ class ActivityParser(Parser):
                 activity_sector.save()
             except ValueError:
                 # complex lookup
-                import itertools
                 match = None
                 for match in itertools.ifilter(lambda x: x[0] == iati_activity_sector_vocabulary_type, VOCABULARY_CHOICES_MAP):
                     match = match
