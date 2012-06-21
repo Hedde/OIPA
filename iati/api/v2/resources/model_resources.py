@@ -9,6 +9,7 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 # Data specific
 from data.models.activity import IATIActivity
+from data.models.activity import IATIActivityTitle
 from data.models.organisation import Organisation
 
 
@@ -24,7 +25,9 @@ class OrganisationResource(ModelResource):
         }
 
     def dehydrate(self, bundle):
-        bundle.data['type'] = self.obj_get(ref=bundle.data['ref']).get_type_display()
+        obj = self.obj_get(ref=bundle.data['ref'])
+        bundle.data['type'] = obj.get_type_display()
+#        bundle.data['total_activities'] = obj.iatiactivity_set.count()
         return super(OrganisationResource, self).dehydrate(bundle)
 
 
@@ -57,4 +60,12 @@ class ActivityResource(ModelResource):
             ref=obj.reporting_organisation.ref,
             org_name=obj.reporting_organisation.org_name,
         )
+        titles = {}
+        for title in obj.iatiactivitytitle_set.all():
+            titles[str(title.language.code)] = str(title.title)
+        bundle.data['title'] = titles
+        descriptions = {}
+        for description in obj.iatiactivitydescription_set.all():
+            descriptions[str(description.language.code)] = unicode(description.description)
+        bundle.data['description'] = descriptions
         return bundle
