@@ -27,10 +27,38 @@ DESCRIPTION_TYPE_CHOICES = (
     (TARGET_GROUPS, _(u"Statement of groups targeted to benefit from the activity")),
 )
 
-TIED_AID_CHOICES = (
+FLOW_TYPE_CHOICES_MAP = zip(['ODA', 'OOF', 'PRIVATE_GRANTS', 'PRIVATE_MARKET', 'OTHER_FLOWS'], range(1, 6))
+ODA, OOF, PRIVATE_GRANTS, PRIVATE_MARKET, OTHER_FLOWS = range(1, 6)
+FLOW_TYPE_CHOICES = (
+    (10, _(u"Official Development Assistance. Those flows to countries and territories on the DAC List of ODA Recipients and to multilateral development institutions which are: -- provided by official agencies, including state and local governments, or by their executive agencies; and -- each transaction of which: a) is administered with the promotion of the economic development and welfare of developing countries as its main objective; and b) is concessional in character and conveys a grant element of at least 25 per cent (calculated at a rate of discount of 10 per cent).")),
+    (20, _(u"Other Official Flows Official sector transactions that do not meet the ODA criteria, e.g. -- Grants to developing countries for representational or essentially commercial purposes. -- Official bilateral transactions intended to promote development but having a grant element of less than 25 per cent. -- Official bilateral transactions, whatever their grant element, that are primarily export-facilitating in purpose. -- The net acquisition by governments and central monetary institutions of securities issued by multilateral development banks at market terms. -- Subsidies (grants) to the private sector to soften its credits to developing countries. -- Funds in support of private investment.")),
+    (30, _(u"Grants made by private non-governmental organisations and other private sources (including foundations and other private bodies). Grants by private non-profit-making agencies, including co-operative societies and trade unions, which are active in development and national in the sense that their funds are fully or mainly obtained from sources in the donor economy.")),
+    (35, _(u"Private long-term (i.e. over one-year maturity) capital transactions. Direct investment (new capital outflows and reinvested earnings), other securities and claims (bonds, export credits, equities) by banks and nonbanks, multilateral private flows.")),
+    (50, _(u"Non-ODA component of peacebuilding operations.")),
+)
+
+TIED_AID_STATUS_CHOICES = (
     (3, _(u"Partially")),
     (4, _(u"Tied")),
     (5, _(u"Untied")),
+)
+
+POLICY_MARKER_CODE_CHOICES = (
+    (1, _(u"Gender Equality")),
+    (2, _(u"Aid to Environment")),
+    (3, _(u"Participatory Development/Good Governance")),
+    (4, _(u"Trade Development")),
+    (5, _(u"Aid Targeting the Objectives of the Convention on Biological Diversity")),
+    (6, _(u"Aid Targeting the Objectives of the Framework Convention on Climate Change - Mitigation")),
+    (7, _(u"Aid Targeting the Objectives of the Framework Convention on Climate Change - Adaptation")),
+    (8, _(u"Aid Targeting the Objectives of the Convention to Combat Desertification")),
+)
+
+POLICY_SIGNIFICANCE_CHOICES = (
+    (0, _(u"not targeted")),
+    (1, _(u"significant objective")),
+    (2, _(u"principal objective")),
+    (3, _(u"principal objective AND in support of an action programme")),
 )
 
 DISBURSEMENT_CHANNEL_CHOICES = (

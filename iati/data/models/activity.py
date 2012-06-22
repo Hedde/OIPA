@@ -21,11 +21,12 @@ from data.models.common import Website
 from data.models.common import Budget
 from data.models.common import CurrencyType
 from data.models.organisation import Organisation
-from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
-from data.models.constants import RELATED_CHOICES
-from data.models.constants import TIED_AID_CHOICES
-from data.models.constants import TRANSACTION_TYPE_CHOICES
 from data.models.constants import DESCRIPTION_TYPE_CHOICES
+from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
+from data.models.constants import POLICY_MARKER_CODE_CHOICES
+from data.models.constants import RELATED_CHOICES
+from data.models.constants import TIED_AID_STATUS_CHOICES
+from data.models.constants import TRANSACTION_TYPE_CHOICES
 
 
 class IATIActivity(models.Model):
@@ -130,7 +131,7 @@ class Transaction(models.Model):
     finance_type = models.ForeignKey(FinanceType)
     aid_type = models.ForeignKey(AidType)
     disbursement_channel = models.IntegerField(choices=DISBURSEMENT_CHANNEL_CHOICES)
-    tied_aid_status_type = models.IntegerField(choices=TIED_AID_CHOICES)
+    tied_aid_status_type = models.IntegerField(choices=TIED_AID_STATUS_CHOICES)
 
     class Meta:
         app_label = "data"
@@ -185,7 +186,7 @@ class IATIActivityWebsite(Website):
 
 class IATIActivityPolicyMarker(models.Model):
     iati_activity = models.ForeignKey(IATIActivity)
-    code = models.CharField(max_length=8)
+    code = models.IntegerField(max_length=5, choices=POLICY_MARKER_CODE_CHOICES)
     vocabulary_type = models.ForeignKey(VocabularyType, blank=True, null=True)
     significance_type = models.ForeignKey(SignificanceType, blank=True, null=True)
 

@@ -3,8 +3,10 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # App specific
-from data.models.constants import COUNTRIES_TUPLE
+from data.models.constants import COUNTRIES_TUPLE, FLOW_TYPE_CHOICES_MAP, TIED_AID_STATUS_CHOICES
+from data.models.constants import FLOW_TYPE_CHOICES
 from data.models.constants import REGION_CHOICES
+from data.models.constants import POLICY_SIGNIFICANCE_CHOICES
 from data.models.constants import VOCABULARY_CHOICES
 
 
@@ -53,32 +55,44 @@ class VocabularyType(models.Model):
         app_label = "data"
 
 
-class SignificanceType(CommonType):
+class SignificanceType(models.Model):
+    code = models.IntegerField(max_length=5, primary_key=True, choices=POLICY_SIGNIFICANCE_CHOICES)
+
     class Meta:
         app_label = "data"
 
 
-class CollaborationType(CommonType):
+class CollaborationType(models.Model):
+    code = models.CharField(max_length=55, primary_key=True)
+
     class Meta:
         app_label = "data"
 
 
-class FlowType(CommonType):
+class FlowType(models.Model):
+    code = models.IntegerField(max_length=5, primary_key=True, choices=FLOW_TYPE_CHOICES)
+
     class Meta:
         app_label = "data"
 
 
-class AidType(CommonType):
+class FinanceType(models.Model):
+    code = models.IntegerField(max_length=5, primary_key=True)
+
     class Meta:
         app_label = "data"
 
 
-class FinanceType(CommonType):
+class AidType(models.Model):
+    code = models.CharField(max_length=5, primary_key=True)
+
     class Meta:
         app_label = "data"
 
 
-class TiedAidStatusType(CommonType):
+class TiedAidStatusType(models.Model):
+    code = models.IntegerField(max_length=5, primary_key=True, choices=TIED_AID_STATUS_CHOICES)
+
     class Meta:
         app_label = "data"
 

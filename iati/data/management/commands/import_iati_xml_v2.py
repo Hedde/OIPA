@@ -9,8 +9,11 @@ from django.core.management import BaseCommand
 from django.db.transaction import commit_on_success
 
 # App specific
-from data.models.constants import COUNTRIES_TUPLE, REGION_CHOICES
+from data.models.constants import COUNTRIES_TUPLE
+from data.models.constants import REGION_CHOICES
+from data.models.constants import FLOW_TYPE_CHOICES_MAP
 from data.models.constants import ORGANISATION_TYPE_CHOICES
+from data.models.constants import POLICY_MARKER_CODE_CHOICES
 from data.models.constants import VOCABULARY_CHOICES_MAP
 from data.models.activity import IATIActivity
 from data.models.activity import IATIActivityTitle
@@ -19,7 +22,16 @@ from data.models.activity import IATIActivityContact
 from data.models.activity import IATIActivityCountry
 from data.models.activity import IATIActivityRegion
 from data.models.activity import IATIActivitySector
-from data.models.common import ActivityStatusType, Country, Region
+from data.models.activity import IATIActivityPolicyMarker
+from data.models.common import ActivityStatusType
+from data.models.common import Country
+from data.models.common import CollaborationType
+from data.models.common import FlowType
+from data.models.common import FinanceType
+from data.models.common import AidType
+from data.models.common import TiedAidStatusType
+from data.models.common import Region
+from data.models.common import SignificanceType
 from data.models.common import VocabularyType
 from data.models.common import Language
 from data.models.organisation import Organisation
@@ -55,6 +67,9 @@ class ActivityParser(Parser):
     """
     XML PARSER IN COMPLIANCE WITH THE IATI ACTIVITY STANDARD
     source: http://iatistandard.org/activities-standard/overview
+
+    @todo
+    DRY, typo catches
     """
     def parse(self):
         count = len(self.root['iati-activity'])
@@ -64,8 +79,7 @@ class ActivityParser(Parser):
 #            if i % 100 == 0 and self.verbosity >= 2:
             if i % 100 == 0:
                 print '%s of %s' % (i, count)
-            if i == 9:
-                self._save_activity(el)
+            self._save_activity(el)
 
     def _save_activity(self, el):
         # ====================================================================
@@ -74,6 +88,8 @@ class ActivityParser(Parser):
 
         # get_or_create >
         # Organisation(models.Model)
+        # --------------------------------------------------------------------
+
         reporting_organisation_name = el['reporting-org']
         reporting_organisation_ref = el['reporting-org'].get('ref')
         reporting_organisation_type = el['reporting-org'].get('type')
@@ -100,6 +116,8 @@ class ActivityParser(Parser):
 
         # get_or_create >
         # IATIActivity(models.Model)
+        # --------------------------------------------------------------------
+
         iati_identifier = str(el['iati-identifier'])
         date_updated = self._parse_datetime(el.get('last-updated-datetime'))
 
@@ -121,6 +139,8 @@ class ActivityParser(Parser):
         # IATIActivityTitle(models.Model)
         # @todo
         # type
+        # --------------------------------------------------------------------
+
         iati_activity.iatiactivitytitle_set.all().delete()
         iati_activity_title = unicode(el.title).encode('UTF-8')
         iati_activity_title_type = el['title'].get('type')
@@ -140,6 +160,8 @@ class ActivityParser(Parser):
         # IATIActivityDescription(models.Model)
         # @todo
         # type
+        # --------------------------------------------------------------------
+
         iati_activity.iatiactivitydescription_set.all().delete()
         iati_activity_description = unicode(el.description).encode('UTF-8')
         iati_activity_description_type = el['description'].get('type')
@@ -159,22 +181,27 @@ class ActivityParser(Parser):
         # ActivityStatusType(models.Model)
         # @todo
         # description & language
-        activity_status_name = unicode(el['activity-status'])
-        activity_status_code = el['activity-status'].get('code')
-        activity_status = None
+        # --------------------------------------------------------------------
 
-        if activity_status_code:
-            activity_status, created = ActivityStatusType.objects.get_or_create(
-                                           code=activity_status_code
-                                       )
-        else:
-            if activity_status_name:
+        if hasattr(el, 'activity-status'):
+            activity_status_name = unicode(el['activity-status'])
+            activity_status_code = el['activity-status'].get('code')
+            activity_status = None
+
+            if activity_status_code:
                 activity_status, created = ActivityStatusType.objects.get_or_create(
-                                               name=str(activity_status_name).capitalize()
+                                               code=activity_status_code
                                            )
+            else:
+                if activity_status_name:
+                    activity_status, created = ActivityStatusType.objects.get_or_create(
+                                                   name=str(activity_status_name).capitalize()
+                                               )
 
-        iati_activity.activity_status = activity_status
-        iati_activity.save() # todo
+            iati_activity.activity_status = activity_status
+            iati_activity.save() # todo
+
+        # --------------------------------------------------------------------
 
         for activity_date in el['activity-date']:
             if activity_date.get('type') == 'start-planned':
@@ -186,6 +213,8 @@ class ActivityParser(Parser):
             elif activity_date.get('type') == 'end-actual':
                 iati_activity.end_actual = activity_date.get('iso-date')
             iati_activity.save()
+
+        # --------------------------------------------------------------------
 
         iati_activity.iatiactivitycontact_set.all().delete()
         if hasattr(el, 'contact-info'):
@@ -202,7 +231,6 @@ class ActivityParser(Parser):
                 iati_activity_contact.mailing_address = el['contact-info']['mailing-address']
             iati_activity_contact.save()
 
-
         # ====================================================================
         # PARTICIPATING ORGANISATIONS
         # ====================================================================
@@ -211,10 +239,12 @@ class ActivityParser(Parser):
         # ParticipatingOrganisation(models.Model)
         # @todo
         # org_name_lang
+        # --------------------------------------------------------------------
 
         iati_activity.participatingorganisation_set.all().delete()
-        for participating_org in el['participating-org']:
-            self._save_participating_org(participating_org, iati_activity)
+        if hasattr(el, 'participating-org'):
+            for participating_org in el['participating-org']:
+                self._save_participating_org(participating_org, iati_activity)
 
         # ====================================================================
         # GEOPOLITICAL INFORMATION
@@ -224,11 +254,18 @@ class ActivityParser(Parser):
         # IATIActivityCountry(models.Model)
         # @todo
         # lang
+        # --------------------------------------------------------------------
 
         iati_activity.iatiactivitycountry_set.all().delete()
         if hasattr(el, 'recipient-country'):
             for recipient_country in el['recipient-country']:
                 self._save_recipient_country(recipient_country, iati_activity)
+
+        # get_or_create >
+        # IATIActivityRegion(models.Model)
+        # @todo
+        # lang
+        # --------------------------------------------------------------------
 
         iati_activity.iatiactivityregion_set.all().delete()
         if hasattr(el, 'recipient-region'):
@@ -243,10 +280,105 @@ class ActivityParser(Parser):
         # IATIActivitySector(models.Model)
         # @todo
         # percentage
+        # --------------------------------------------------------------------
 
         iati_activity.iatiactivitysector_set.all().delete()
-        for sector in el.sector:
-            self._save_sector(sector, iati_activity)
+        if hasattr(el, 'sector'):
+            for sector in el.sector:
+                self._save_sector(sector, iati_activity)
+
+        # get_or_create >
+        # IATIActivityPolicyMarker(models.Model)
+        # --------------------------------------------------------------------
+
+        iati_activity.iatiactivitypolicymarker_set.all().delete()
+        if hasattr(el, 'policy-marker'):
+            for policy_marker in el['policy-marker']:
+                if policy_marker.get('significance'):
+                    try:
+                        if int(policy_marker.get('significance')) in range(1, 4):
+                            self._save_policy_marker(policy_marker, iati_activity)
+                    except ValueError:
+                        pass
+
+        # get_or_create >
+        # CollaborationType(models.Model)
+        # --------------------------------------------------------------------
+        if hasattr(el, 'collaboration-type'):
+            collaboration_type_code = el['collaboration-type'].get('code')
+            if collaboration_type_code:
+                iati_activity.collaboration_type = CollaborationType.objects.get_or_create(
+                                                       code=collaboration_type_code
+                                                   )[0]
+
+        # get_or_create >
+        # FlowType(models.Model)
+        # --------------------------------------------------------------------
+        if hasattr(el, 'default-flow-type'):
+            # todo catch typo
+            try:
+                iati_activity.default_flow_type = FlowType.objects.get_or_create(
+                                                      code=int(el['default-flow-type'].get('code'))
+                                                  )[0]
+                iati_activity.save()
+            except ValueError:
+                default_flow_type = str(el['default-flow-type']).replace(' ', '_').replace('-', '_').upper()
+                try:
+                    iati_activity.default_flow_type = FlowType.objects.get_or_create(
+                                                          code=int(default_flow_type)
+                                                      )[0]
+                    iati_activity.save()
+                except ValueError:
+                    match = None
+                    for k, v in FLOW_TYPE_CHOICES_MAP:
+                        if k == default_flow_type:
+                            match = v
+                    if match:
+                        iati_activity.default_flow_type = FlowType.objects.get_or_create(
+                                                              code=match
+                                                          )[0]
+                        iati_activity.save()
+                    else:
+                        pass
+#                        e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
+#                        raise Exception(e)
+
+        # get_or_create >
+        # FinanceType(models.Model)
+        # --------------------------------------------------------------------
+
+        if hasattr(el, 'default-finance-type'):
+            try:
+                iati_activity.default_finance_type = FinanceType.objects.get_or_create(
+                                                         code=int(el['default-finance-type'].get('code'))
+                                                     )[0]
+                iati_activity.save()
+            except ValueError:
+                pass
+
+        # get_or_create >
+        # AidType(models.Model)
+        # --------------------------------------------------------------------
+        if hasattr(el, 'default-aid-type'):
+            aid_type_code = el['default-aid-type'].get('code')
+            if aid_type_code:
+                iati_activity.default_aid_type = AidType.objects.get_or_create(
+                    code=aid_type_code
+                )[0]
+
+        # get_or_create >
+        # TiedAidStatus(models.Model)
+        # --------------------------------------------------------------------
+        if hasattr(el, 'default-tied-status'):
+            tied_aid_status = el['default-tied-status'].get('code')
+            try:
+                if int(tied_aid_status) in range(3, 6):
+                    iati_activity.default_aid_type = TiedAidStatusType.objects.get_or_create(
+                                                         code=int(tied_aid_status)
+                                                     )[0]
+            except ValueError:
+                pass
+
 
         # ====================================================================
         # FINANCIAL
@@ -265,27 +397,6 @@ class ActivityParser(Parser):
         # ====================================================================
 
 
-#        activity.flow_type = FlowType(code=1, name='test') # HARD CODE
-#
-#        for item in el['activity-date']:
-#            name = item.get('type').replace('-', '_')
-#            if hasattr(activity, name):
-#                date_str = item.get('iso-date')
-#                if date_str:
-#                    setattr(activity, name, self._parse_date(date_str))
-#
-#        try:
-#            activity.recipient_country_code = el['recipient-country'].get('code')
-#        except AttributeError:
-#            pass
-#        activity.save()
-#
-#        # save participating-org
-#        #        activity.participatingorganisation_set.all().delete()
-#
-#        for item in el['participating-org']:
-#            self._save_participating_org(item, activity)
-#
 #        # save transactions
 #        activity.transaction_set.all().delete()
 #
@@ -297,18 +408,12 @@ class ActivityParser(Parser):
 #
 #        activity.total_budget = str(total_budget)
 #        activity.save()
-#
-#        # save policy-marker
-#        activity.policymarker_set.all().delete()
-#
-#        for item in el['policy-marker']:
-#            self._save_policy_marker(item, activity)
-#
+
 
     def _save_recipient_country(self, recipient_country, iati_activity):
         match = None
         for key in dict(COUNTRIES_TUPLE).keys():
-            if key == int(recipient_country.get('code')):
+            if key == recipient_country.get('code'):
                 match = key
         if match:
             IATIActivityCountry.objects.create(
@@ -358,15 +463,73 @@ class ActivityParser(Parser):
                         participating_organisation.type = k
             participating_organisation.save()
 
-#    def _save_policy_marker(self, el, activity):
-#        pm = PolicyMarker(activity=activity)
-#        pm.description = unicode(el)
-#        pm.vocabulary = unicode(el.get('vocabulary'))
-#        pm.significance = unicode(el.get('significance', ''))
-#        pm.code = unicode(el.get('code'))
-#        pm.save()
-#        return pm
-#
+    def _save_policy_marker(self, policy_marker, iati_activity):
+        policy = None
+        policy_significance_type = SignificanceType.objects.get_or_create(
+                                       code=int(policy_marker.get('significance'))
+                                   )[0]
+        try:
+            policy_code = int(policy_marker.get('code'))
+            if policy_code in dict(POLICY_MARKER_CODE_CHOICES).keys():
+                policy = IATIActivityPolicyMarker.objects.create(
+                             iati_activity=iati_activity,
+                             code=policy_code,
+                             significance_type=policy_significance_type
+                         )
+
+        except ValueError:
+            pass
+
+        vocabulary_type = str(policy_marker.get('vocabulary')).replace(' ', '_').replace('-', '_')
+        if vocabulary_type and policy:
+            try:
+                policy.vocabulary_type = int(vocabulary_type)
+            except ValueError:
+                match = None
+                for key in dict(VOCABULARY_CHOICES_MAP).keys():
+                    if key == vocabulary_type:
+                        match = key
+                if match:
+                    policy.vocabulary_type = match
+                else:
+                    pass
+#                    e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
+#                    raise Exception(e)
+
+    def _save_sector(self, sector, iati_activity):
+        iati_activity_sector_code = sector.get('code')
+        iati_activity_sector_vocabulary_type = str(sector.get('vocabulary')).replace(' ', '_').replace('-', '_')
+
+        activity_sector, created = IATIActivitySector.objects.get_or_create(
+            iati_activity=iati_activity,
+            code=iati_activity_sector_code
+        )
+
+        if iati_activity_sector_vocabulary_type:
+            try:
+                iati_activity_sector_vocabulary_type = int(iati_activity_sector_vocabulary_type)
+                activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
+                    code=iati_activity_sector_vocabulary_type
+                )[0]
+                activity_sector.save()
+            except ValueError:
+                match = None
+                for key in dict(VOCABULARY_CHOICES_MAP).keys():
+                    if key == iati_activity_sector_vocabulary_type:
+                        match = key
+                if match:
+                    iati_activity_sector_vocabulary_type = match
+                    activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
+                        code=iati_activity_sector_vocabulary_type
+                    )[0]
+                    activity_sector.save()
+                else:
+                    pass
+                #                    e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
+                #                    raise Exception(e)
+        return
+
+
 #    def _save_transaction(self, el, activity):
 #        tr = Transaction(activity=activity)
 #        tr.transaction_type = el['transaction-type']
@@ -377,40 +540,6 @@ class ActivityParser(Parser):
 #        tr.transaction_date = self._parse_date(el['transaction-date'].get('iso-date'))
 #        tr.save()
 #        return tr
-
-    def _save_sector(self, sector, iati_activity):
-        iati_activity_sector_code = sector.get('code')
-        iati_activity_sector_vocabulary_type = str(sector.get('vocabulary')).replace(' ', '_').replace('-', '_')
-
-        activity_sector, created = IATIActivitySector.objects.get_or_create(
-                                       iati_activity=iati_activity,
-                                       code=iati_activity_sector_code
-                                   )
-
-        if iati_activity_sector_vocabulary_type:
-            try:
-                iati_activity_sector_vocabulary_type = int(iati_activity_sector_vocabulary_type)
-                activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
-                                                      code=iati_activity_sector_vocabulary_type
-                                                  )[0]
-                activity_sector.save()
-            except ValueError:
-                match = None
-                for key in dict(VOCABULARY_CHOICES_MAP).keys():
-                    if key == iati_activity_sector_vocabulary_type:
-                        match = key
-                if match:
-                    iati_activity_sector_vocabulary_type = match
-                    activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
-                                                          code=iati_activity_sector_vocabulary_type
-                                                      )[0]
-                    activity_sector.save()
-                else:
-                    pass
-#                    e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
-#                    raise Exception(e)
-        return
-
 
 
 class Command(BaseCommand):

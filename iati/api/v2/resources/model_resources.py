@@ -69,20 +69,4 @@ class ActivityResource(ModelResource):
 
     def dehydrate(self, bundle):
         obj = self.obj_get(iati_identifier=bundle.data['iati_identifier'])
-        bundle.data['reporting_organisation'] = dict(
-            ref=obj.reporting_organisation.ref,
-            org_name=obj.reporting_organisation.org_name,
-        )
-        bundle.data['recipient_country'] = dict(
-            country=obj.iatiactivitycountry_set.all()[0].country.get_iso_display(),
-            iso=obj.iatiactivitycountry_set.all()[0].country.iso
-        )
-        titles = {}
-        for title in obj.iatiactivitytitle_set.all():
-            titles[title.language.code] = title.title
-        bundle.data['title'] = titles
-        descriptions = {}
-        for description in obj.iatiactivitydescription_set.all():
-            descriptions[description.language.code] = description.description
-        bundle.data['description'] = descriptions
         return bundle
