@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from settings import rel
 
 from datetime import datetime
@@ -10,7 +11,7 @@ from django.core.management import BaseCommand
 from django.db.transaction import commit_on_success
 
 # App specific
-from data.models.constants import COUNTRIES_TUPLE
+from data.models.constants import COUNTRIES_TUPLE, REGION_CHOICES
 from data.models.constants import ORGANISATION_TYPE_CHOICES
 from data.models.constants import VOCABULARY_CHOICES_MAP
 from data.models.activity import IATIActivity
@@ -18,8 +19,9 @@ from data.models.activity import IATIActivityTitle
 from data.models.activity import IATIActivityDescription
 from data.models.activity import IATIActivityContact
 from data.models.activity import IATIActivityCountry
+from data.models.activity import IATIActivityRegion
 from data.models.activity import IATIActivitySector
-from data.models.common import ActivityStatusType, Country
+from data.models.common import ActivityStatusType, Country, Region
 from data.models.common import VocabularyType
 from data.models.common import Language
 from data.models.organisation import Organisation
@@ -61,7 +63,8 @@ class ActivityParser(Parser):
         i = 0
         for el in self.root['iati-activity']:
             i += 1
-            if i % 100 == 0 and self.verbosity >= 2:
+#            if i % 100 == 0 and self.verbosity >= 2:
+            if i % 100 == 0:
                 print '%s of %s' % (i, count)
             self._save_activity(el)
 
@@ -157,19 +160,22 @@ class ActivityParser(Parser):
         # ActivityStatusType(models.Model)
         # @todo
         # description & language
-        activity_status_name = el['activity-status']
+        activity_status_name = unicode(el['activity-status'])
         activity_status_code = el['activity-status'].get('code')
+        activity_status = None
 
-        if activity_status_name:
+        if activity_status_code:
             activity_status, created = ActivityStatusType.objects.get_or_create(
-                name=str(activity_status_name).capitalize()
-            )
-            if activity_status_code:
-                activity_status.code = activity_status_code
-                activity_status.save()
+                                           code=activity_status_code
+                                       )
+        else:
+            if activity_status_name:
+                activity_status, created = ActivityStatusType.objects.get_or_create(
+                                               name=str(activity_status_name).capitalize()
+                                           )
 
-            iati_activity.activity_status = activity_status
-            iati_activity.save() # todo
+        iati_activity.activity_status = activity_status
+        iati_activity.save() # todo
 
         for activity_date in el['activity-date']:
             if activity_date.get('type') == 'start-planned':
@@ -221,8 +227,14 @@ class ActivityParser(Parser):
         # lang
 
         iati_activity.iatiactivitycountry_set.all().delete()
-        for recipient_country in el['recipient-country']:
-            self._save_recipient_country(recipient_country, iati_activity)
+        if hasattr(el, 'recipient-country'):
+            for recipient_country in el['recipient-country']:
+                self._save_recipient_country(recipient_country, iati_activity)
+
+        iati_activity.iatiactivityregion_set.all().delete()
+        if hasattr(el, 'recipient-region'):
+            for recipient_region in el['recipient-region']:
+                self._save_recipient_region(recipient_region, iati_activity)
 
         # ====================================================================
         # CLASSIFICATIONS
@@ -310,11 +322,27 @@ class ActivityParser(Parser):
 #            raise Exception(e)
             pass
 
+    def _save_recipient_region(self, recipient_region, iati_activity):
+        match = None
+        for match in itertools.ifilter(lambda x: x[0] == recipient_region.get('code'), REGION_CHOICES):
+            match = match[0]
+        if match:
+            IATIActivityRegion.objects.create(
+                iati_activity=iati_activity,
+                region=Region.objects.get_or_create(
+                                            code=match
+                                        )[0]
+            )
+        else:
+#            e = "ValueError: Unsupported country_iso '"+str(recipient_country.get('code'))+"' in COUNTRIES_TUPLE"
+#            raise Exception(e)
+            pass
+
     def _save_participating_org(self, participating_org, iati_activity):
         participating_organisation = ParticipatingOrganisation.objects.create(
             iati_activity=iati_activity
         )
-        participating_organisation.org_name = str(participating_org) # TODO trim spaces
+        participating_organisation.org_name = unicode(participating_org).encode('UTF-8') # TODO trim spaces
         participating_organisation.ref = participating_org.get('ref')
         participating_organisation.role = participating_org.get('role')
 
@@ -328,7 +356,7 @@ class ActivityParser(Parser):
                     if participating_organisation_type == v:
                         participating_organisation.type = k
             participating_organisation.save()
-#
+
 #    def _save_policy_marker(self, el, activity):
 #        pm = PolicyMarker(activity=activity)
 #        pm.description = unicode(el)
