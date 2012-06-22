@@ -1,10 +1,8 @@
-from django.db.utils import IntegrityError
 from settings import rel
 
 from datetime import datetime
 from lxml import etree, objectify
 from optparse import make_option
-import itertools
 
 # Django specific
 from django.core.management import BaseCommand
@@ -66,7 +64,8 @@ class ActivityParser(Parser):
 #            if i % 100 == 0 and self.verbosity >= 2:
             if i % 100 == 0:
                 print '%s of %s' % (i, count)
-            self._save_activity(el)
+            if i == 9:
+                self._save_activity(el)
 
     def _save_activity(self, el):
         # ====================================================================
@@ -308,8 +307,9 @@ class ActivityParser(Parser):
 
     def _save_recipient_country(self, recipient_country, iati_activity):
         match = None
-        for match in itertools.ifilter(lambda x: x[0] == recipient_country.get('code'), COUNTRIES_TUPLE):
-            match = match[0]
+        for key in dict(COUNTRIES_TUPLE).keys():
+            if key == int(recipient_country.get('code')):
+                match = key
         if match:
             IATIActivityCountry.objects.create(
                 iati_activity=iati_activity,
@@ -324,8 +324,9 @@ class ActivityParser(Parser):
 
     def _save_recipient_region(self, recipient_region, iati_activity):
         match = None
-        for match in itertools.ifilter(lambda x: x[0] == recipient_region.get('code'), REGION_CHOICES):
-            match = match[0]
+        for key in dict(REGION_CHOICES).keys():
+            if key == int(recipient_region.get('code')):
+                match = key
         if match:
             IATIActivityRegion.objects.create(
                 iati_activity=iati_activity,
@@ -334,7 +335,7 @@ class ActivityParser(Parser):
                                         )[0]
             )
         else:
-#            e = "ValueError: Unsupported country_iso '"+str(recipient_country.get('code'))+"' in COUNTRIES_TUPLE"
+#            e = "ValueError: Unsupported country_iso '"+str(recipient_country.get('code'))+"' in REGION_CHOICES"
 #            raise Exception(e)
             pass
 
@@ -394,12 +395,12 @@ class ActivityParser(Parser):
                                                   )[0]
                 activity_sector.save()
             except ValueError:
-                # complex lookup
                 match = None
-                for match in itertools.ifilter(lambda x: x[0] == iati_activity_sector_vocabulary_type, VOCABULARY_CHOICES_MAP):
-                    match = match
+                for key in dict(VOCABULARY_CHOICES_MAP).keys():
+                    if key == iati_activity_sector_vocabulary_type:
+                        match = key
                 if match:
-                    iati_activity_sector_vocabulary_type = match[1]
+                    iati_activity_sector_vocabulary_type = match
                     activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
                                                           code=iati_activity_sector_vocabulary_type
                                                       )[0]
