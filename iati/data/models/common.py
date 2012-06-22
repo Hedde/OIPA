@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # App specific
-from data.models.constants import BUDGET_TYPE_CHOICES
+from data.models.constants import BUDGET_TYPE_CHOICES, TRANSACTION_TYPE_CHOICES, DISBURSEMENT_CHANNEL_CHOICES
 from data.models.constants import COUNTRIES_TUPLE
 from data.models.constants import FLOW_TYPE_CHOICES
 from data.models.constants import FLOW_TYPE_CHOICES_MAP
@@ -11,6 +11,7 @@ from data.models.constants import POLICY_SIGNIFICANCE_CHOICES
 from data.models.constants import REGION_CHOICES
 from data.models.constants import TIED_AID_STATUS_CHOICES
 from data.models.constants import VOCABULARY_CHOICES
+from data.models.organisation import Organisation
 
 
 class Language(models.Model):
@@ -128,9 +129,26 @@ class Sector(models.Model):
 class Budget(models.Model):
     period_start = models.DateField()
     period_end = models.DateField()
-    value = models.FloatField()
+    value = models.DecimalField(max_digits=20, decimal_places=2)
     type = models.IntegerField(max_length=2, choices=BUDGET_TYPE_CHOICES, blank=True, null=True)
     currency = models.ForeignKey(CurrencyType, blank=True, null=True)
+
+    class Meta:
+        app_label = "data"
+
+
+class Transaction(models.Model):
+    transaction_type = models.IntegerField(choices=TRANSACTION_TYPE_CHOICES)
+    provider_org = models.ForeignKey(Organisation, related_name='provider_org')
+#    receiver_org = models.ForeignKey(Organisation, related_name='receiver_org')
+    value = models.DecimalField(max_digits=20, decimal_places=2)
+    value_date = models.DateField()
+    transaction_date = models.DateField()
+    flow_type = models.ForeignKey(FlowType, blank=True, null=True)
+    finance_type = models.ForeignKey(FinanceType, blank=True, null=True)
+    aid_type = models.ForeignKey(AidType, blank=True, null=True)
+    disbursement_channel = models.IntegerField(choices=DISBURSEMENT_CHANNEL_CHOICES, blank=True, null=True)
+    tied_aid_status_type = models.IntegerField(choices=TIED_AID_STATUS_CHOICES, blank=True, null=True)
 
     class Meta:
         app_label = "data"

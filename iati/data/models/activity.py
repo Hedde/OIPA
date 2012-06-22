@@ -20,6 +20,7 @@ from data.models.common import Document
 from data.models.common import Website
 from data.models.common import Budget
 from data.models.common import CurrencyType
+from data.models.common import Transaction
 from data.models.organisation import Organisation
 from data.models.constants import DESCRIPTION_TYPE_CHOICES
 from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
@@ -116,22 +117,11 @@ class IATIActivitySector(Sector):
         app_label = "data"
 
 
-class Transaction(models.Model):
+class IATITransaction(Transaction):
     """
     If omitted, the provider organisation is the reporting organisation
     """
     iati_activity = models.ForeignKey(IATIActivity)
-    transaction_type = models.IntegerField(choices=TRANSACTION_TYPE_CHOICES)
-    provider_org = models.ForeignKey(Organisation, related_name='provider_org')
-    receiver_org = models.ForeignKey(Organisation, related_name='receiver_org')
-    value = models.DecimalField(max_digits=20, decimal_places=2)
-    value_date = models.DateField()
-    transaction_date = models.DateField()
-    flow_type = models.ForeignKey(FlowType)
-    finance_type = models.ForeignKey(FinanceType)
-    aid_type = models.ForeignKey(AidType)
-    disbursement_channel = models.IntegerField(choices=DISBURSEMENT_CHANNEL_CHOICES)
-    tied_aid_status_type = models.IntegerField(choices=TIED_AID_STATUS_CHOICES)
 
     class Meta:
         app_label = "data"

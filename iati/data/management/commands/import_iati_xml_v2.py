@@ -15,7 +15,7 @@ from data.models.constants import FLOW_TYPE_CHOICES_MAP
 from data.models.constants import ORGANISATION_TYPE_CHOICES
 from data.models.constants import POLICY_MARKER_CODE_CHOICES
 from data.models.constants import VOCABULARY_CHOICES_MAP
-from data.models.activity import IATIActivity
+from data.models.activity import IATIActivity, IATITransaction
 from data.models.activity import IATIActivityBudget
 from data.models.activity import IATIActivityTitle
 from data.models.activity import IATIActivityDescription
@@ -24,6 +24,7 @@ from data.models.activity import IATIActivityCountry
 from data.models.activity import IATIActivityRegion
 from data.models.activity import IATIActivitySector
 from data.models.activity import IATIActivityPolicyMarker
+from data.models.activity import IATITransaction
 from data.models.common import ActivityStatusType
 from data.models.common import Country
 from data.models.common import CollaborationType
@@ -380,7 +381,6 @@ class ActivityParser(Parser):
             except ValueError:
                 pass
 
-
         # ====================================================================
         # FINANCIAL
         # ====================================================================
@@ -397,7 +397,7 @@ class ActivityParser(Parser):
                 period_end = self._parse_date(el.budget['period-end'].get('iso-date'))
                 IATIActivityBudget.objects.create(
                                                iati_activity=iati_activity,
-                                               value=float(getattr(el.budget, 'value')),
+                                               value=str(getattr(el.budget, 'value')),
                                                period_start=period_start,
                                                period_end=period_end
                                            )
@@ -406,6 +406,17 @@ class ActivityParser(Parser):
         # TRANSACTION
         # ====================================================================
 
+        # get_or_create >
+        # Transaction(models.Model)
+        # @todo
+        # type, currency, lang
+        # --------------------------------------------------------------------
+
+        iati_activity.iatitransaction_set.all().delete()
+        print '===== ', iati_activity, ' ====='
+        for transaction in el.transaction:
+            self._save_transaction(transaction, iati_activity, organisation)
+
         # ====================================================================
         # RELATED DOCUMENTS
         # ====================================================================
@@ -413,19 +424,6 @@ class ActivityParser(Parser):
         # ====================================================================
         # PERFORMANCE
         # ====================================================================
-
-
-#        # save transactions
-#        activity.transaction_set.all().delete()
-#
-#        total_budget = 0
-#        for item in el.transaction:
-#            tr = self._save_transaction(item, activity)
-#            if tr.transaction_type == 'Commitments':
-#                total_budget += float(tr.value)
-#
-#        activity.total_budget = str(total_budget)
-#        activity.save()
 
 
     def _save_recipient_country(self, recipient_country, iati_activity):
@@ -547,17 +545,37 @@ class ActivityParser(Parser):
                 #                    raise Exception(e)
         return
 
+    def _save_transaction(self, transaction, iati_activity, organisation):
+        rec_organisation = None
 
-#    def _save_transaction(self, el, activity):
-#        tr = Transaction(activity=activity)
-#        tr.transaction_type = el['transaction-type']
-#        tr.provider_org = unicode(el['provider-org'])
-#        tr.receiver_org = unicode(el['receiver-org'])
-#        tr.value = el.value.text
-#        tr.value_date = self._parse_date(el.value.get('value-date'))
-#        tr.transaction_date = self._parse_date(el['transaction-date'].get('iso-date'))
-#        tr.save()
-#        return tr
+        if hasattr(transaction, 'provider-org'):
+            ref = transaction['providing-org'].get('ref')
+            try:
+                organisation = Organisation.objects.get(ref=ref)
+            except Organisation.DoesNotExist:
+                pass
+        if hasattr(transaction, 'receiver-org'):
+            ref = transaction['receiver-org'].get('ref')
+            rec_organisation = Organisation.objects.get_or_create(
+                ref=ref,
+            )
+            rec_organisation.org_name = transaction['receiver-org']
+            rec_organisation.save()
+        else:
+            try:
+                rec_organisation=iati_activity.iatiactivitycountry_set.all()[0]
+            print iati_activity.iatiactivityregion_set.all()
+
+        IATITransaction.objects.create(
+                                    iati_activity=iati_activity,
+                                    provider_org=organisation,
+                                    receiver_org=rec_organisation,
+                                    value=transaction.value.text,
+                                    value_date=self._parse_date(transaction.value.get('value-date')),
+                                    transaction_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
+                                )
+
+        return
 
 
 class Command(BaseCommand):
