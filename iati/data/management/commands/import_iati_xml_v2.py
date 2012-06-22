@@ -16,6 +16,7 @@ from data.models.constants import ORGANISATION_TYPE_CHOICES
 from data.models.constants import POLICY_MARKER_CODE_CHOICES
 from data.models.constants import VOCABULARY_CHOICES_MAP
 from data.models.activity import IATIActivity
+from data.models.activity import IATIActivityBudget
 from data.models.activity import IATIActivityTitle
 from data.models.activity import IATIActivityDescription
 from data.models.activity import IATIActivityContact
@@ -383,6 +384,23 @@ class ActivityParser(Parser):
         # ====================================================================
         # FINANCIAL
         # ====================================================================
+
+        # get_or_create >
+        # IATIActivityBudget(models.Model)
+        # @todo
+        # type, currency, lang
+        # --------------------------------------------------------------------
+        iati_activity.iatiactivitybudget_set.all().delete()
+        if hasattr(el, 'budget'):
+            if hasattr(el.budget, 'value') and hasattr(el.budget, 'period-start') and hasattr(el.budget, 'period-end'):
+                period_start = self._parse_date(el.budget['period-start'].get('iso-date'))
+                period_end = self._parse_date(el.budget['period-end'].get('iso-date'))
+                IATIActivityBudget.objects.create(
+                                               iati_activity=iati_activity,
+                                               value=float(getattr(el.budget, 'value')),
+                                               period_start=period_start,
+                                               period_end=period_end
+                                           )
 
         # ====================================================================
         # TRANSACTION

@@ -3,10 +3,13 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # App specific
-from data.models.constants import COUNTRIES_TUPLE, FLOW_TYPE_CHOICES_MAP, TIED_AID_STATUS_CHOICES
+from data.models.constants import BUDGET_TYPE_CHOICES
+from data.models.constants import COUNTRIES_TUPLE
 from data.models.constants import FLOW_TYPE_CHOICES
-from data.models.constants import REGION_CHOICES
+from data.models.constants import FLOW_TYPE_CHOICES_MAP
 from data.models.constants import POLICY_SIGNIFICANCE_CHOICES
+from data.models.constants import REGION_CHOICES
+from data.models.constants import TIED_AID_STATUS_CHOICES
 from data.models.constants import VOCABULARY_CHOICES
 
 
@@ -114,13 +117,6 @@ class ActivityStatusType(models.Model):
         app_label = "data"
 
 
-class BudgetType(CommonType):
-    language = models.ForeignKey(Country, blank=True, null=True)
-
-    class Meta:
-        app_label = "data"
-
-
 class Sector(models.Model):
     code = models.CharField(max_length=55)
     vocabulary_type = models.ForeignKey(VocabularyType, blank=True, null=True)
@@ -129,11 +125,12 @@ class Sector(models.Model):
         abstract = True
 
 
-class Budget(BudgetType):
+class Budget(models.Model):
     period_start = models.DateField()
-    periode_end = models.DateField()
-    type = models.ForeignKey(BudgetType, related_name='budget_type')
-    currency = models.ForeignKey(CurrencyType)
+    period_end = models.DateField()
+    value = models.FloatField()
+    type = models.IntegerField(max_length=2, choices=BUDGET_TYPE_CHOICES, blank=True, null=True)
+    currency = models.ForeignKey(CurrencyType, blank=True, null=True)
 
     class Meta:
         app_label = "data"

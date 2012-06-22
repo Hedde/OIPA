@@ -43,6 +43,11 @@ TIED_AID_STATUS_CHOICES = (
     (5, _(u"Untied")),
 )
 
+BUDGET_TYPE_CHOICES = (
+    (1, _(u"Original")),
+    (2, _(u"Revised")),
+)
+
 POLICY_MARKER_CODE_CHOICES = (
     (1, _(u"Gender Equality")),
     (2, _(u"Aid to Environment")),

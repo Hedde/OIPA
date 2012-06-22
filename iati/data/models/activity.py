@@ -137,7 +137,7 @@ class Transaction(models.Model):
         app_label = "data"
 
 
-class ActivityBudget(Budget):
+class IATIActivityBudget(Budget):
     iati_activity = models.ForeignKey(IATIActivity)
 
     class Meta:
