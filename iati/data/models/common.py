@@ -160,7 +160,7 @@ class Contact(models.Model):
     person_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     telephone = models.CharField(max_length=50, blank=True, null=True)
-    mailing_address = models.CharField(max_length=255)
+    mailing_address = models.CharField(max_length=500)
 
     class Meta:
         abstract = True

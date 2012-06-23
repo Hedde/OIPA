@@ -48,7 +48,9 @@ http://iatiregistry.org/publisher/theglobalfund
 previous:
 [ x ] link failed, parse failed (ValueError: time data '2011-08-09' does not match format '%Y-%m-%d %H:%M:%S')
 current:
-
+[ v ] link ok, parse ok
+comment:
+    missing ref, added participating_org.get('ref', 'UNDEFINED') for exceptions
 
 http://iatiregistry.org/publisher/sida
 
@@ -78,7 +80,6 @@ previous:
 current:
 [ v ] link ok, parse ok
 
-
 http://iatiregistry.org/publisher/aa
 
 previous:
@@ -91,7 +92,9 @@ http://iatiregistry.org/publisher/globalgiving
 previous:
 [ x ] link failed, parse (ValueError: time data '2010-07-23T16:18:17.000' does not match format '%Y-%m-%d %H:%M:%S')
 current:
-
+[ v ] link ok, parse ok
+comment:
+    missing activity-date, added hasattr(el, 'activity-date') for exceptions
 
 http://iatiregistry.org/publisher/finland_mfa
 
@@ -100,14 +103,12 @@ previous:
 current:
 [ v ] link ok, parse ok
 
-
 http://iatiregistry.org/publisher/eu
 
 previous:
 [ v ] link ok, parse ok
 current:
 [ v ] link ok, parse ok
-
 
 http://iatiregistry.org/publisher/ewb_canada
 

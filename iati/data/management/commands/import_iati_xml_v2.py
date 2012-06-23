@@ -41,6 +41,8 @@ from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
 PARSER_DEBUG = False
+PARSER_DEBUG_NUMBER = None # example: 1494
+PARSER_DEBUG_RANGE = None # range(1440, 1500)
 
 
 class ImportError(Exception):
@@ -79,7 +81,15 @@ class ActivityParser(Parser):
         for el in self.root['iati-activity']:
             i += 1
             if PARSER_DEBUG:
-                if i == 25:
+                if PARSER_DEBUG_NUMBER:
+                    if i == PARSER_DEBUG_NUMBER:
+                        print "ACTIVITY", i
+                        self._save_activity(el)
+                elif PARSER_DEBUG_RANGE:
+                    if i in PARSER_DEBUG_RANGE:
+                        print "ACTIVITY", i
+                        self._save_activity(el)
+                else:
                     print "ACTIVITY", i
                     self._save_activity(el)
             else:
@@ -222,16 +232,17 @@ class ActivityParser(Parser):
 
         if PARSER_DEBUG:
             print "setting activity-dates"
-        for activity_date in el['activity-date']:
-            if activity_date.get('type') == 'start-planned':
-                iati_activity.start_planned = activity_date.get('iso-date')
-            elif activity_date.get('type') == 'start-actual':
-                iati_activity.start_actual = activity_date.get('iso-date')
-            elif activity_date.get('type') == 'end-planned':
-                iati_activity.end_planned = activity_date.get('iso-date')
-            elif activity_date.get('type') == 'end-actual':
-                iati_activity.end_actual = activity_date.get('iso-date')
-            iati_activity.save()
+        if hasattr(el, 'activity-date'):
+            for activity_date in el['activity-date']:
+                if activity_date.get('type') == 'start-planned':
+                    iati_activity.start_planned = activity_date.get('iso-date')
+                elif activity_date.get('type') == 'start-actual':
+                    iati_activity.start_actual = activity_date.get('iso-date')
+                elif activity_date.get('type') == 'end-planned':
+                    iati_activity.end_planned = activity_date.get('iso-date')
+                elif activity_date.get('type') == 'end-actual':
+                    iati_activity.end_actual = activity_date.get('iso-date')
+                iati_activity.save()
 
         # --------------------------------------------------------------------
 
@@ -518,7 +529,7 @@ class ActivityParser(Parser):
             iati_activity=iati_activity
         )
         participating_organisation.org_name = unicode(participating_org).encode('UTF-8') # TODO trim spaces
-        participating_organisation.ref = participating_org.get('ref')
+        participating_organisation.ref = participating_org.get('ref', 'UNDEFINED')
         participating_organisation.role = participating_org.get('role')
 
         participating_organisation_type = participating_org.get('type')
