@@ -1,5 +1,6 @@
 from settings import rel
 
+import dateutil.parser as dtparser
 from datetime import datetime
 from lxml import etree, objectify
 from optparse import make_option
@@ -39,6 +40,8 @@ from data.models.common import VocabularyType
 from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
+PARSER_DEBUG = True
+
 
 class ImportError(Exception):
     pass
@@ -54,11 +57,8 @@ class Parser(object):
     def _parse_date(self, s, format='%Y-%m-%d'):
         return datetime.strptime(s, format).date()
 
-    def _parse_datetime(self, s, format='%Y-%m-%dT%H:%M:%S'):
-        try:
-            return datetime.strptime(s, format)
-        except ValueError:
-            return datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
+    def _parse_datetime(self, s):
+        return dtparser.parse(s).date()
 
 
 class OrganisationParser(Parser):
@@ -78,10 +78,15 @@ class ActivityParser(Parser):
         i = 0
         for el in self.root['iati-activity']:
             i += 1
-#            if i % 100 == 0 and self.verbosity >= 2:
-            if i % 100 == 0:
-                print '%s of %s' % (i, count)
-            self._save_activity(el)
+            if PARSER_DEBUG:
+                if i == 1:
+                    print "ACTIVITY", i
+                    self._save_activity(el)
+            else:
+#                if i % 100 == 0 and self.verbosity >= 2:
+                if i % 100 == 0:
+                    print '%s of %s' % (i, count)
+                self._save_activity(el)
 
     def _save_activity(self, el):
         # ====================================================================
@@ -129,9 +134,9 @@ class ActivityParser(Parser):
                                      date_updated=date_updated
                                  )
 
-        if not self.force_update and iati_activity.date_updated >= date_updated:
-            print "WARNING | This record already exists. Use --force-update to override."
-            return
+#        if not self.force_update and iati_activity.date_updated >= date_updated:
+#            print "WARNING | This record already exists. Use --force-update to override."
+#            return
 
         # ====================================================================
         # BASIC ACTIVITY INFORMATION
@@ -143,6 +148,8 @@ class ActivityParser(Parser):
         # type
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting title"
         iati_activity.iatiactivitytitle_set.all().delete()
         iati_activity_title = unicode(el.title).encode('UTF-8')
         iati_activity_title_type = el['title'].get('type')
@@ -164,20 +171,23 @@ class ActivityParser(Parser):
         # type
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting description"
         iati_activity.iatiactivitydescription_set.all().delete()
-        iati_activity_description = unicode(el.description).encode('UTF-8')
-        iati_activity_description_type = el['description'].get('type')
-        iati_activity_description_language = str(el['description'].get('{http://www.w3.org/XML/1998/namespace}lang', 'default')).lower()
+        if hasattr(el, 'description'):
+            iati_activity_description = unicode(el.description).encode('UTF-8')
+            iati_activity_description_type = el['description'].get('type')
+            iati_activity_description_language = str(el['description'].get('{http://www.w3.org/XML/1998/namespace}lang', 'default')).lower()
 
-        activity_description, created = IATIActivityDescription.objects.get_or_create(
-                                            iati_activity=iati_activity,
-                                            description=iati_activity_description
-                                        )
-        if iati_activity_description_language:
-            activity_description.language = Language.objects.get_or_create(
-                                                code=iati_activity_description_language
-                                            )[0]
-            activity_description.save()
+            activity_description, created = IATIActivityDescription.objects.get_or_create(
+                                                iati_activity=iati_activity,
+                                                description=iati_activity_description
+                                            )
+            if iati_activity_description_language:
+                activity_description.language = Language.objects.get_or_create(
+                                                    code=iati_activity_description_language
+                                                )[0]
+                activity_description.save()
 
         # get_or_create >
         # ActivityStatusType(models.Model)
@@ -185,6 +195,8 @@ class ActivityParser(Parser):
         # description & language
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting activity-status"
         if hasattr(el, 'activity-status'):
             activity_status_name = unicode(el['activity-status'])
             activity_status_code = el['activity-status'].get('code')
@@ -205,6 +217,8 @@ class ActivityParser(Parser):
 
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting activity-dates"
         for activity_date in el['activity-date']:
             if activity_date.get('type') == 'start-planned':
                 iati_activity.start_planned = activity_date.get('iso-date')
@@ -218,6 +232,8 @@ class ActivityParser(Parser):
 
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting activity-contacts"
         iati_activity.iatiactivitycontact_set.all().delete()
         if hasattr(el, 'contact-info'):
             iati_activity_contact = IATIActivityContact.objects.create(
@@ -243,6 +259,8 @@ class ActivityParser(Parser):
         # org_name_lang
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting participating-orgs"
         iati_activity.participatingorganisation_set.all().delete()
         if hasattr(el, 'participating-org'):
             for participating_org in el['participating-org']:
@@ -258,6 +276,8 @@ class ActivityParser(Parser):
         # lang
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting recipient-country"
         iati_activity.iatiactivitycountry_set.all().delete()
         if hasattr(el, 'recipient-country'):
             for recipient_country in el['recipient-country']:
@@ -268,6 +288,9 @@ class ActivityParser(Parser):
         # @todo
         # lang
         # --------------------------------------------------------------------
+
+        if PARSER_DEBUG:
+            print "setting recipient-region"
 
         iati_activity.iatiactivityregion_set.all().delete()
         if hasattr(el, 'recipient-region'):
@@ -284,6 +307,8 @@ class ActivityParser(Parser):
         # percentage
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting activity-sectors"
         iati_activity.iatiactivitysector_set.all().delete()
         if hasattr(el, 'sector'):
             for sector in el.sector:
@@ -293,6 +318,8 @@ class ActivityParser(Parser):
         # IATIActivityPolicyMarker(models.Model)
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting policy-markers"
         iati_activity.iatiactivitypolicymarker_set.all().delete()
         if hasattr(el, 'policy-marker'):
             for policy_marker in el['policy-marker']:
@@ -306,6 +333,9 @@ class ActivityParser(Parser):
         # get_or_create >
         # CollaborationType(models.Model)
         # --------------------------------------------------------------------
+
+        if PARSER_DEBUG:
+            print "setting collaboration-type"
         if hasattr(el, 'collaboration-type'):
             collaboration_type_code = el['collaboration-type'].get('code')
             if collaboration_type_code:
@@ -316,6 +346,9 @@ class ActivityParser(Parser):
         # get_or_create >
         # FlowType(models.Model)
         # --------------------------------------------------------------------
+
+        if PARSER_DEBUG:
+            print "setting default-flow-type"
         if hasattr(el, 'default-flow-type'):
             # todo catch typo
             try:
@@ -349,6 +382,8 @@ class ActivityParser(Parser):
         # FinanceType(models.Model)
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting default-finance-type"
         if hasattr(el, 'default-finance-type'):
             try:
                 iati_activity.default_finance_type = FinanceType.objects.get_or_create(
@@ -361,6 +396,9 @@ class ActivityParser(Parser):
         # get_or_create >
         # AidType(models.Model)
         # --------------------------------------------------------------------
+
+        if PARSER_DEBUG:
+            print "setting default-aid-type"
         if hasattr(el, 'default-aid-type'):
             aid_type_code = el['default-aid-type'].get('code')
             if aid_type_code:
@@ -371,6 +409,9 @@ class ActivityParser(Parser):
         # get_or_create >
         # TiedAidStatus(models.Model)
         # --------------------------------------------------------------------
+
+        if PARSER_DEBUG:
+            print "setting default-tied-status"
         if hasattr(el, 'default-tied-status'):
             tied_aid_status = el['default-tied-status'].get('code')
             try:
@@ -390,6 +431,9 @@ class ActivityParser(Parser):
         # @todo
         # type, currency, lang
         # --------------------------------------------------------------------
+
+        if PARSER_DEBUG:
+            print "setting activity-budgets"
         iati_activity.iatiactivitybudget_set.all().delete()
         if hasattr(el, 'budget'):
             if hasattr(el.budget, 'value') and hasattr(el.budget, 'period-start') and hasattr(el.budget, 'period-end'):
@@ -412,9 +456,12 @@ class ActivityParser(Parser):
         # type, currency, lang
         # --------------------------------------------------------------------
 
+        if PARSER_DEBUG:
+            print "setting transactions"
         iati_activity.iatitransaction_set.all().delete()
-        for transaction in el.transaction:
-            self._save_transaction(transaction, iati_activity, organisation)
+        if hasattr(el, 'transaction'):
+            for transaction in el.transaction:
+                self._save_transaction(transaction, iati_activity, organisation)
 
         # ====================================================================
         # RELATED DOCUMENTS
@@ -540,13 +587,16 @@ class ActivityParser(Parser):
                     org_name=getattr(transaction, 'provider-org')
                 )
 
+        value_date = transaction.value.get('value-date')
+        if not value_date:
+            value_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
         transaction_type = transaction['transaction-type'].get('code')
         iati_transaction = IATITransaction.objects.create(
                                                         iati_activity=iati_activity,
                                                         provider_org=organisation,
                                                         transaction_type=transaction_type,
                                                         value=transaction.value.text,
-                                                        value_date=self._parse_date(transaction.value.get('value-date')),
+                                                        value_date=value_date,
                                                         transaction_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
                                                     )
 
