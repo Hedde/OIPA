@@ -40,7 +40,7 @@ previous:
 current:
 [ v ] link ok, parse ok
 comment:
-    value-date is required on Transactions, if there wasn't a value-date the transaction-date was used.
+    1. value-date is required on Transactions, if there wasn't a value-date the transaction-date was used.
 
 
 http://iatiregistry.org/publisher/theglobalfund
@@ -50,21 +50,24 @@ previous:
 current:
 [ v ] link ok, parse ok
 comment:
-    missing ref, added participating_org.get('ref', 'UNDEFINED') for exceptions
+    1. missing ref, added participating_org.get('ref', 'UNDEFINED') for exceptions
 
 http://iatiregistry.org/publisher/sida
 
 previous:
 [ v ] link ok, parse ok
 current:
-
+[ v ] link ok, parse ok
 
 http://iatiregistry.org/publisher/spark
 
 previous:
 [ ~ ] link ok, parse warning (building resource_uri problem, possibly due to whitespace in iati_identifier)
 current:
-
+[ v ] link ok, parse ok
+comment:
+    1. building resource_uri problem, added fix_whitespaces decorator for iati_identifier
+    2. comma value (must be pointer for decimal), value=str(getattr(el.budget, 'value')).replace(',', '.') for exceptions @todo DRY
 
 http://iatiregistry.org/publisher/pwyf
 
@@ -117,15 +120,16 @@ previous:
 current:
 [ v ] link ok, parse ok
 comment:
-    missing description, added hasattr(el, 'description') for exceptions
-
+    1. missing description, added hasattr(el, 'description') for exceptions
 
 http://iatiregistry.org/publisher/dfid
 
 previous:
 [ x ] link ok, parse failed (TypeError: strptime() argument 1 must be string, not None)
 current:
-
+[ v ] link ok, parse ok
+comment:
+    dateutil.parser error for format '%Y-%m-%dZ', slicing s for exceptions
 
 http://iatiregistry.org/publisher/ausaid
 

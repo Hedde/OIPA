@@ -45,6 +45,33 @@ PARSER_DEBUG_NUMBER = None # example: 1494
 PARSER_DEBUG_RANGE = None # range(1440, 1500)
 
 
+def fix_whitespaces(element, leading=True, ending=True, content=True):
+    def fix_content(element):
+        return element.replace(' ', '-')
+    def fix_leading(element):
+        while element[0] == ' ':
+            element = element[1:]
+        return element
+    def fix_ending(element):
+        length = len(element)
+        while element[length-1] == ' ':
+            element = element[:length-1]
+            length = len(element)
+        return element
+    if leading and not ending:
+        if content:
+            return fix_content(fix_leading(leading))
+        return fix_leading(element)
+    elif ending and not leading:
+        if content:
+            return fix_content(fix_ending(element))
+        return fix_ending(element)
+    elif leading and ending:
+        if content:
+            return fix_content(fix_ending(fix_leading(element)))
+        return fix_ending(fix_leading(element))
+
+
 class ImportError(Exception):
     pass
 
@@ -57,6 +84,8 @@ class Parser(object):
         self.verbosity = verbosity
 
     def _parse_date(self, s, format='%Y-%m-%d'):
+        if len(s) == 11:
+            return datetime.strptime(s[:10], format).date()
         return datetime.strptime(s, format).date()
 
     def _parse_datetime(self, s):
@@ -136,7 +165,8 @@ class ActivityParser(Parser):
         # --------------------------------------------------------------------
 
         iati_identifier = str(el['iati-identifier'])
-        date_updated = self._parse_datetime(el.get('last-updated-datetime'))
+        iati_identifier = fix_whitespaces(iati_identifier)
+        date_updated = self._parse_datetime(el.get('last-updated-datetime', str(datetime.now())))
 
         iati_activity, created = IATIActivity.objects.get_or_create(
                                      iati_identifier=iati_identifier,
@@ -455,7 +485,7 @@ class ActivityParser(Parser):
                 period_end = self._parse_date(el.budget['period-end'].get('iso-date'))
                 IATIActivityBudget.objects.create(
                                                iati_activity=iati_activity,
-                                               value=str(getattr(el.budget, 'value')),
+                                               value=str(getattr(el.budget, 'value')).replace(',', '.'),
                                                period_start=period_start,
                                                period_end=period_end
                                            )
@@ -614,7 +644,7 @@ class ActivityParser(Parser):
                                                         provider_org=organisation,
                                                         transaction_type=transaction_type,
                                                         value=transaction.value.text,
-                                                        value_date=value_date,
+                                                        value_date=self._parse_date(value_date),
                                                         transaction_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
                                                     )
 
