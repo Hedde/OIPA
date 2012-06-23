@@ -3,6 +3,9 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # App specific
+from data.models.constants import DESCRIPTION_TYPE_CHOICES
+from data.models.constants import POLICY_MARKER_CODE_CHOICES
+from data.models.constants import RELATED_CHOICES
 from data.models.common import Contact
 from data.models.common import Country
 from data.models.common import Language
@@ -22,12 +25,6 @@ from data.models.common import Budget
 from data.models.common import CurrencyType
 from data.models.common import Transaction
 from data.models.organisation import Organisation
-from data.models.constants import DESCRIPTION_TYPE_CHOICES
-from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
-from data.models.constants import POLICY_MARKER_CODE_CHOICES
-from data.models.constants import RELATED_CHOICES
-from data.models.constants import TIED_AID_STATUS_CHOICES
-from data.models.constants import TRANSACTION_TYPE_CHOICES
 
 
 class IATIActivity(models.Model):

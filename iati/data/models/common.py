@@ -3,13 +3,14 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 # App specific
-from data.models.constants import BUDGET_TYPE_CHOICES, TRANSACTION_TYPE_CHOICES, DISBURSEMENT_CHANNEL_CHOICES
+from data.models.constants import BUDGET_TYPE_CHOICES
 from data.models.constants import COUNTRIES_TUPLE
+from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
 from data.models.constants import FLOW_TYPE_CHOICES
-from data.models.constants import FLOW_TYPE_CHOICES_MAP
 from data.models.constants import POLICY_SIGNIFICANCE_CHOICES
 from data.models.constants import REGION_CHOICES
 from data.models.constants import TIED_AID_STATUS_CHOICES
+from data.models.constants import TRANSACTION_TYPE_CHOICES
 from data.models.constants import VOCABULARY_CHOICES
 from data.models.organisation import Organisation
 
