@@ -40,7 +40,7 @@ from data.models.common import VocabularyType
 from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
-PARSER_DEBUG = True
+PARSER_DEBUG = False
 
 
 class ImportError(Exception):
@@ -79,7 +79,7 @@ class ActivityParser(Parser):
         for el in self.root['iati-activity']:
             i += 1
             if PARSER_DEBUG:
-                if i == 1:
+                if i == 25:
                     print "ACTIVITY", i
                     self._save_activity(el)
             else:
@@ -245,11 +245,11 @@ class ActivityParser(Parser):
             if hasattr(el['contact-info'], 'organisation'):
                 iati_activity_contact.organisation = unicode(el['contact-info']['organisation']).encode('UTF-8')
             if hasattr(el['contact-info'], 'telephone'):
-                iati_activity_contact.telephone = el['contact-info']['telephone']
+                iati_activity_contact.telephone = unicode(el['contact-info']['telephone']).encode('UTF-8')
             if hasattr(el['contact-info'], 'email'):
-                iati_activity_contact.email = el['contact-info']['email']
+                iati_activity_contact.email = unicode(el['contact-info']['email']).encode('UTF-8')
             if hasattr(el['contact-info'], 'mailing-address'):
-                iati_activity_contact.mailing_address = el['contact-info']['mailing-address']
+                iati_activity_contact.mailing_address = unicode(el['contact-info']['mailing-address']).encode('UTF-8')
             iati_activity_contact.save()
 
         # ====================================================================
