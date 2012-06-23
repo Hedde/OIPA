@@ -45,12 +45,14 @@ comment:
 
 http://iatiregistry.org/publisher/theglobalfund
 
+comment:
 previous:
 [ x ] link failed, parse failed (ValueError: time data '2011-08-09' does not match format '%Y-%m-%d %H:%M:%S')
 current:
 [ v ] link ok, parse ok
-comment:
-    missing ref, added participating_org.get('ref', 'UNDEFINED') for exceptions
+
+edit:
+missing ref, added participating_org.get('ref', 'UNDEFINED') for exceptions
 
 http://iatiregistry.org/publisher/sida
 
