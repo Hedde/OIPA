@@ -129,9 +129,9 @@ class ActivityParser(Parser):
                                      date_updated=date_updated
                                  )
 
-#        if not self.force_update and iati_activity.date_updated >= date_updated:
-#            print "Don't override existing records"
-#            return
+        if not self.force_update and iati_activity.date_updated >= date_updated:
+            print "WARNING | This record already exists. Use --force-update to override."
+            return
 
         # ====================================================================
         # BASIC ACTIVITY INFORMATION
@@ -552,14 +552,19 @@ class ActivityParser(Parser):
 
         if hasattr(transaction, 'receiver-org'):
             ref = transaction['receiver-org'].get('ref')
-            rec_organisation = Organisation.objects.get_or_create(
-                                   ref=ref,
-                                   org_name=transaction['receiver-org']
-                               )
-            rec_organisation.org_name = transaction['receiver-org']
-            rec_organisation.save()
-            iati_transaction.receiver_org=rec_organisation
-            iati_transaction.save()
+            org_name = unicode(transaction['receiver-org'])
+            if ref and org_name:
+                try:
+                    rec_organisation = Organisation.objects.get(
+                                           ref=ref,
+                                       )
+                except Organisation.DoesNotExist:
+                    rec_organisation = Organisation.objects.create(
+                                           ref=ref,
+                                           org_name=org_name
+                                       )
+                iati_transaction.receiver_org=rec_organisation
+                iati_transaction.save()
 
         return
 
