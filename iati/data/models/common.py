@@ -138,9 +138,9 @@ class Budget(models.Model):
 
 
 class Transaction(models.Model):
-    transaction_type = models.IntegerField(choices=TRANSACTION_TYPE_CHOICES)
+    transaction_type = models.CharField(max_length=55, choices=TRANSACTION_TYPE_CHOICES)
     provider_org = models.ForeignKey(Organisation, related_name='provider_org')
-#    receiver_org = models.ForeignKey(Organisation, related_name='receiver_org')
+    receiver_org = models.ForeignKey(Organisation, related_name='receiver_org', blank=True, null=True)
     value = models.DecimalField(max_digits=20, decimal_places=2)
     value_date = models.DateField()
     transaction_date = models.DateField()

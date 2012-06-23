@@ -9,15 +9,14 @@ RELATED_CHOICES = (
     (MULTIFUNDED, _(u"A multifunded, or co-funded activity. The identifier should be globally unique and shared by all reporters of this activity.")),
 )
 
-C, D, E, IF, IR, LR, R = range(1, 8)
 TRANSACTION_TYPE_CHOICES = (
-    (C, _(u"Commitment")),
-    (D, _(u"Disbursement")),
-    (E, _(u"Expenditure")),
-    (IF, _(u"Incoming Funds")),
-    (IR, _(u"Interest Repayment")),
-    (LR, _(u"Loan Repayment")),
-    (R, _(u"Reimbursement")),
+    (u"C", _(u"Commitment")),
+    (u"D", _(u"Disbursement")),
+    (u"E", _(u"Expenditure")),
+    (u"IF", _(u"Incoming Funds")),
+    (u"IR", _(u"Interest Repayment")),
+    (u"LR", _(u"Loan Repayment")),
+    (u"R", _(u"Reimbursement")),
 )
 
 GENERAL, OBJECTIVES, TARGET_GROUPS = range(1, 4)
@@ -110,15 +109,13 @@ COUNTRIES_TUPLE = (
     COUNTRY_ISO_MAP.items()
 )
 
-VOCABULARY_CHOICES_MAP = zip(['ADT', 'COFOG', 'DAC', 'DAC_3', 'ISO', 'NTEE', 'RO', 'WB'], range(1, 9))
-ADT, COFOG, DAC, DAC_3, ISO, NTEE, RO, WB = range(1, 9)
 VOCABULARY_CHOICES = (
-    (ADT, _(u"AidData")),
-    (COFOG, _(u"Classification of the Functions of Government (UN)")),
-    (DAC, _(u"Development Assistance Committee")),
-    (DAC_3, _(u"OECD Development Assistance Committee 3 digit codes")),
-    (ISO, _(u"International Organization for Standardization")),
-    (NTEE, _(u"National Taxonomy for Exempt Entities (USA)")),
-    (RO, _(u"Reporting Organisation (i.e. maintained by the organisation referred to in the element.")),
-    (WB, _(u"World Bank")),
+    (u"ADT", _(u"AidData")),
+    (u"COFOG", _(u"Classification of the Functions of Government (UN)")),
+    (u"DAC", _(u"Development Assistance Committee")),
+    (u"DAC-3", _(u"OECD Development Assistance Committee 3 digit codes")),
+    (u"ISO", _(u"International Organization for Standardization")),
+    (u"NTEE", _(u"National Taxonomy for Exempt Entities (USA)")),
+    (u"RO", _(u"Reporting Organisation (i.e. maintained by the organisation referred to in the element.")),
+    (u"WB", _(u"World Bank")),
 )

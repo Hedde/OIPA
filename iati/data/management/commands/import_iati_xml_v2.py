@@ -10,32 +10,32 @@ from django.db.transaction import commit_on_success
 
 # App specific
 from data.models.constants import COUNTRIES_TUPLE
-from data.models.constants import REGION_CHOICES
 from data.models.constants import FLOW_TYPE_CHOICES_MAP
 from data.models.constants import ORGANISATION_TYPE_CHOICES
 from data.models.constants import POLICY_MARKER_CODE_CHOICES
-from data.models.constants import VOCABULARY_CHOICES_MAP
-from data.models.activity import IATIActivity, IATITransaction
+from data.models.constants import REGION_CHOICES
+from data.models.constants import VOCABULARY_CHOICES
+from data.models.activity import IATIActivity
 from data.models.activity import IATIActivityBudget
-from data.models.activity import IATIActivityTitle
-from data.models.activity import IATIActivityDescription
 from data.models.activity import IATIActivityContact
 from data.models.activity import IATIActivityCountry
+from data.models.activity import IATIActivityDescription
+from data.models.activity import IATIActivityPolicyMarker
 from data.models.activity import IATIActivityRegion
 from data.models.activity import IATIActivitySector
-from data.models.activity import IATIActivityPolicyMarker
+from data.models.activity import IATIActivityTitle
 from data.models.activity import IATITransaction
 from data.models.common import ActivityStatusType
-from data.models.common import Country
-from data.models.common import CollaborationType
-from data.models.common import FlowType
-from data.models.common import FinanceType
 from data.models.common import AidType
-from data.models.common import TiedAidStatusType
+from data.models.common import CollaborationType
+from data.models.common import Country
+from data.models.common import FinanceType
+from data.models.common import FlowType
+from data.models.common import Language
 from data.models.common import Region
 from data.models.common import SignificanceType
+from data.models.common import TiedAidStatusType
 from data.models.common import VocabularyType
-from data.models.common import Language
 from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
@@ -496,64 +496,61 @@ class ActivityParser(Parser):
         except ValueError:
             pass
 
-        vocabulary_type = str(policy_marker.get('vocabulary')).replace(' ', '_').replace('-', '_')
+        vocabulary_type = unicode(policy_marker.get('vocabulary'))
         if vocabulary_type and policy:
-            try:
+            if vocabulary_type in dict(VOCABULARY_CHOICES).keys():
+                policy.vocabulary_type = VocabularyType.objects.get_or_create(
+                                             code=vocabulary_type
+                                         )[0]
+                policy.save()
                 policy.vocabulary_type = int(vocabulary_type)
-            except ValueError:
-                match = None
-                for key in dict(VOCABULARY_CHOICES_MAP).keys():
-                    if key == vocabulary_type:
-                        match = key
-                if match:
-                    policy.vocabulary_type = match
-                else:
-                    pass
-#                    e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
-#                    raise Exception(e)
+            else:
+                pass
+#                e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
+#                raise Exception(e)
 
     def _save_sector(self, sector, iati_activity):
         iati_activity_sector_code = sector.get('code')
-        iati_activity_sector_vocabulary_type = str(sector.get('vocabulary')).replace(' ', '_').replace('-', '_')
+        iati_activity_sector_vocabulary_type = unicode(sector.get('vocabulary'))
 
         activity_sector, created = IATIActivitySector.objects.get_or_create(
             iati_activity=iati_activity,
             code=iati_activity_sector_code
         )
 
-        if iati_activity_sector_vocabulary_type:
-            try:
-                iati_activity_sector_vocabulary_type = int(iati_activity_sector_vocabulary_type)
-                activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
-                    code=iati_activity_sector_vocabulary_type
-                )[0]
-                activity_sector.save()
-            except ValueError:
-                match = None
-                for key in dict(VOCABULARY_CHOICES_MAP).keys():
-                    if key == iati_activity_sector_vocabulary_type:
-                        match = key
-                if match:
-                    iati_activity_sector_vocabulary_type = match
-                    activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
-                        code=iati_activity_sector_vocabulary_type
-                    )[0]
-                    activity_sector.save()
-                else:
-                    pass
-                #                    e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
-                #                    raise Exception(e)
+        if iati_activity_sector_vocabulary_type in dict(VOCABULARY_CHOICES).keys():
+            activity_sector.vocabulary_type = VocabularyType.objects.get_or_create(
+                                                  code=iati_activity_sector_vocabulary_type
+                                              )[0]
+            activity_sector.save()
+        else:
+            pass
+#            e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
+#            raise Exception(e)
+
         return
 
     def _save_transaction(self, transaction, iati_activity, organisation):
-        rec_organisation = None
-
         if hasattr(transaction, 'provider-org'):
             ref = transaction['providing-org'].get('ref')
             try:
                 organisation = Organisation.objects.get(ref=ref)
             except Organisation.DoesNotExist:
-                pass
+                organisation = Organisation.objects.create(
+                    ref=ref,
+                    org_name=getattr(transaction, 'providing-org')
+                )
+
+        transaction_type = transaction['transaction-type'].get('code')
+        iati_transaction = IATITransaction.objects.create(
+                                                        iati_activity=iati_activity,
+                                                        provider_org=organisation,
+                                                        transaction_type=transaction_type,
+                                                        value=transaction.value.text,
+                                                        value_date=self._parse_date(transaction.value.get('value-date')),
+                                                        transaction_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
+                                                    )
+
         if hasattr(transaction, 'receiver-org'):
             ref = transaction['receiver-org'].get('ref')
             rec_organisation = Organisation.objects.get_or_create(
@@ -561,19 +558,8 @@ class ActivityParser(Parser):
             )
             rec_organisation.org_name = transaction['receiver-org']
             rec_organisation.save()
-        else:
-            try:
-                rec_organisation=iati_activity.iatiactivitycountry_set.all()[0]
-            print iati_activity.iatiactivityregion_set.all()
-
-        IATITransaction.objects.create(
-                                    iati_activity=iati_activity,
-                                    provider_org=organisation,
-                                    receiver_org=rec_organisation,
-                                    value=transaction.value.text,
-                                    value_date=self._parse_date(transaction.value.get('value-date')),
-                                    transaction_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
-                                )
+            iati_transaction.receiver_org=rec_organisation
+            iati_transaction.save()
 
         return
 
