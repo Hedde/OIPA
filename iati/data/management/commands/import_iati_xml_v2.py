@@ -531,13 +531,13 @@ class ActivityParser(Parser):
 
     def _save_transaction(self, transaction, iati_activity, organisation):
         if hasattr(transaction, 'provider-org'):
-            ref = transaction['providing-org'].get('ref')
+            ref = transaction['provider-org'].get('ref')
             try:
                 organisation = Organisation.objects.get(ref=ref)
             except Organisation.DoesNotExist:
                 organisation = Organisation.objects.create(
                     ref=ref,
-                    org_name=getattr(transaction, 'providing-org')
+                    org_name=getattr(transaction, 'provider-org')
                 )
 
         transaction_type = transaction['transaction-type'].get('code')
@@ -553,8 +553,9 @@ class ActivityParser(Parser):
         if hasattr(transaction, 'receiver-org'):
             ref = transaction['receiver-org'].get('ref')
             rec_organisation = Organisation.objects.get_or_create(
-                ref=ref,
-            )
+                                   ref=ref,
+                                   org_name=transaction['receiver-org']
+                               )
             rec_organisation.org_name = transaction['receiver-org']
             rec_organisation.save()
             iati_transaction.receiver_org=rec_organisation
