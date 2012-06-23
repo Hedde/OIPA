@@ -149,6 +149,9 @@ class ActivityParser(Parser):
         # --------------------------------------------------------------------
 
         if PARSER_DEBUG:
+            print "=========================="
+            print "Running tests..."
+            print "=========================="
             print "setting title"
         iati_activity.iatiactivitytitle_set.all().delete()
         iati_activity_title = unicode(el.title).encode('UTF-8')
@@ -240,7 +243,7 @@ class ActivityParser(Parser):
                                         iati_activity=iati_activity
                                     )
             if hasattr(el['contact-info'], 'organisation'):
-                iati_activity_contact.organisation = el['contact-info']['organisation']
+                iati_activity_contact.organisation = unicode(el['contact-info']['organisation']).encode('UTF-8')
             if hasattr(el['contact-info'], 'telephone'):
                 iati_activity_contact.telephone = el['contact-info']['telephone']
             if hasattr(el['contact-info'], 'email'):
@@ -462,6 +465,10 @@ class ActivityParser(Parser):
         if hasattr(el, 'transaction'):
             for transaction in el.transaction:
                 self._save_transaction(transaction, iati_activity, organisation)
+        if PARSER_DEBUG:
+            print "=========================="
+            print "All tests passed...!"
+            print "=========================="
 
         # ====================================================================
         # RELATED DOCUMENTS
