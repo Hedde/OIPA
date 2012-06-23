@@ -413,7 +413,6 @@ class ActivityParser(Parser):
         # --------------------------------------------------------------------
 
         iati_activity.iatitransaction_set.all().delete()
-        print '===== ', iati_activity, ' ====='
         for transaction in el.transaction:
             self._save_transaction(transaction, iati_activity, organisation)
 
