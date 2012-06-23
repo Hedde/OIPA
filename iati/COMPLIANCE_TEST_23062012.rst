@@ -143,14 +143,14 @@ http://iatiregistry.org/publisher/childhopeuk
 previous:
 [ v ] link ok, parse ok
 current:
-
+[ v ] link ok, parse ok
 
 http://iatiregistry.org/publisher/buildafrica
 
 previous:
 [ v ] link ok, parse ok
 current:
-
+[ v ] link ok, parse ok
 
 http://iatiregistry.org/publisher/hpa
 

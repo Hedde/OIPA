@@ -40,7 +40,7 @@ from data.models.common import VocabularyType
 from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
-PARSER_DEBUG = False
+PARSER_DEBUG = True
 PARSER_DEBUG_NUMBER = None # example: 1494
 PARSER_DEBUG_RANGE = None # range(1440, 1500)
 
@@ -636,17 +636,23 @@ class ActivityParser(Parser):
                 )
 
         value_date = transaction.value.get('value-date')
+        transaction_date = None
+        if hasattr(transaction, 'transaction-date'):
+            transaction_date = transaction['transaction-date'].get('iso-date')
         if not value_date:
-            value_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
+            value_date = transaction_date
         transaction_type = transaction['transaction-type'].get('code')
         iati_transaction = IATITransaction.objects.create(
                                                         iati_activity=iati_activity,
                                                         provider_org=organisation,
                                                         transaction_type=transaction_type,
-                                                        value=transaction.value.text,
+                                                        value=transaction.value.text.replace(',', '.'),
                                                         value_date=self._parse_date(value_date),
-                                                        transaction_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
                                                     )
+
+        if hasattr(transaction, 'transaction-date'):
+            iati_transaction.transaction_date = transaction_date
+            iati_transaction.save()
 
         if hasattr(transaction, 'receiver-org'):
             ref = transaction['receiver-org'].get('ref')

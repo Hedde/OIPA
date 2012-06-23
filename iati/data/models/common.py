@@ -144,7 +144,7 @@ class Transaction(models.Model):
     receiver_org = models.ForeignKey(Organisation, related_name='receiver_org', blank=True, null=True)
     value = models.DecimalField(max_digits=20, decimal_places=2)
     value_date = models.DateField()
-    transaction_date = models.DateField()
+    transaction_date = models.DateField(blank=True, null=True)
     flow_type = models.ForeignKey(FlowType, blank=True, null=True)
     finance_type = models.ForeignKey(FinanceType, blank=True, null=True)
     aid_type = models.ForeignKey(AidType, blank=True, null=True)
