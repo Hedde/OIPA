@@ -88,7 +88,7 @@ http://iatiregistry.org/publisher/aa
 previous:
 [ ~ ] link ok, parse failed, manual fix (Leading whitespace on some iati-identifier and reporting-org elements)
 current:
-
+ERROR - empty providing-org ref
 
 http://iatiregistry.org/publisher/globalgiving
 
@@ -129,7 +129,7 @@ previous:
 current:
 [ v ] link ok, parse ok
 comment:
-    dateutil.parser error for format '%Y-%m-%dZ', slicing s for exceptions
+    1. dateutil.parser error for format '%Y-%m-%dZ', slicing s for exceptions
 
 http://iatiregistry.org/publisher/ausaid
 
@@ -157,10 +157,13 @@ http://iatiregistry.org/publisher/hpa
 previous:
 [ v ] link ok, parse ok
 current:
-
+[ v ] link ok, parse ok
+comment:
+    1. transaction value missing, exception handler: set to 0 for unknown transaction values
 
 http://iatiregistry.org/publisher/lead_international
 
 previous:
 [ v ] link ok, parse ok
 current:
+[ v ] link ok, parse ok

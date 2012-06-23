@@ -41,7 +41,7 @@ from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
 PARSER_DEBUG = True
-PARSER_DEBUG_NUMBER = None # example: 1494
+PARSER_DEBUG_NUMBER = 3 # example: 1494
 PARSER_DEBUG_RANGE = None # range(1440, 1500)
 
 
@@ -629,27 +629,35 @@ class ActivityParser(Parser):
             ref = transaction['provider-org'].get('ref')
             try:
                 organisation = Organisation.objects.get(ref=ref)
+                print 1, organisation
             except Organisation.DoesNotExist:
                 organisation = Organisation.objects.create(
                     ref=ref,
                     org_name=getattr(transaction, 'provider-org')
                 )
+                print 2, organisation
 
-        value_date = transaction.value.get('value-date')
+        if transaction.value.text:
+            value=transaction.value.text.replace(',', '.')
+        else:
+            value='0'
+        value_date = self._parse_date(transaction.value.get('value-date'))
         transaction_date = None
         if hasattr(transaction, 'transaction-date'):
-            transaction_date = transaction['transaction-date'].get('iso-date')
+            transaction_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
         if not value_date:
             value_date = transaction_date
         transaction_type = transaction['transaction-type'].get('code')
+        print organisation
+        print organisation.ref
         iati_transaction = IATITransaction.objects.create(
                                                         iati_activity=iati_activity,
                                                         provider_org=organisation,
                                                         transaction_type=transaction_type,
-                                                        value=transaction.value.text.replace(',', '.'),
-                                                        value_date=self._parse_date(value_date),
+                                                        value=value,
+                                                        value_date=value_date,
                                                     )
-
+        print "HERE"
         if hasattr(transaction, 'transaction-date'):
             iati_transaction.transaction_date = transaction_date
             iati_transaction.save()
