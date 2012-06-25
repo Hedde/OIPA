@@ -1,5 +1,5 @@
 ==========================
-Compliance Test 19/06/2012
+Compliance Test 23/06/2012
 ==========================
 note: If there wasn't a collection file for all activities, a single country was picked randomly
 
