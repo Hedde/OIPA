@@ -18,9 +18,9 @@ def redirect(request):
     return HttpResponseRedirect('/api/v2/docs/')
 
 urlpatterns = patterns('',
-    (r'^$', 'api.v2.views.docs_index'),
     (r'^$', redirect),
     (r'^v2/$', redirect),
+    (r'^v2/docs/$', 'api.v2.views.docs_index'),
     (r'^v2/docs/resources/$', 'api.v2.views.docs_resources'),
     (r'^v2/docs/filtering/$', 'api.v2.views.docs_filtering'),
     (r'^v2/docs/license/$', 'api.v2.views.docs_license'),
