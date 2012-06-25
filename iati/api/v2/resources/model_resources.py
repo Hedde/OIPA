@@ -56,20 +56,27 @@ class ActivityResource(ModelResource):
         filtering = {
             # example to allow field specific filtering.
             'activity_status': ALL,
+            'iati_identifier': ALL,
             'reporting_organisation': ALL_WITH_RELATIONS
-            }
+        }
 
     def apply_filters(self, request, applicable_filters):
         base_object_list = super(ActivityResource, self).apply_filters(request,
             applicable_filters)
         query = request.GET.get('query', None)
+        countries = request.GET.get('countries', None)
+        filters = {}
+        if countries:
+            # @todo: implement smart filtering with seperator detection
+            countries = countries.replace('|', ' ').replace('-', ' ').split(' ')
+            filters.update(dict(iatiactivitycountry__country__iso__in=countries))
         if query:
             qset = (
-                Q(iatiactivitytitle__title__icontains=query) |
-                Q(iatiactivitydescription__description__icontains=query)
+                Q(iatiactivitytitle__title__icontains=query, **filters) |
+                Q(iatiactivitydescription__description__icontains=query, **filters)
             )
             base_object_list = base_object_list.filter(qset).distinct()
-        return base_object_list
+        return base_object_list.filter(**filters).distinct()
 
     def dehydrate(self, bundle):
         obj = self.obj_get(iati_identifier=bundle.data['iati_identifier'])
