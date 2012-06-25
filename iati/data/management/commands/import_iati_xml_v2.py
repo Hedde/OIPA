@@ -40,9 +40,9 @@ from data.models.common import VocabularyType
 from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
-PARSER_DEBUG = True
+PARSER_DEBUG = False
 # Use either a number or range not both
-PARSER_DEBUG_NUMBER = 1 # example: 1494
+PARSER_DEBUG_NUMBER = None # example: 1494
 PARSER_DEBUG_RANGE = None # range(1440, 1500)
 
 
