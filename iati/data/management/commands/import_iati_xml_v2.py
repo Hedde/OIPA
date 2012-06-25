@@ -1,9 +1,11 @@
 from settings import rel
 
 import dateutil.parser as dtparser
+
 from datetime import datetime
 from lxml import etree, objectify
 from optparse import make_option
+from utils.helpers import fix_whitespaces
 
 # Django specific
 from django.core.management import BaseCommand
@@ -40,37 +42,11 @@ from data.models.common import VocabularyType
 from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
+
 PARSER_DEBUG = False
 # Use either a number or range not both
 PARSER_DEBUG_NUMBER = None # example: 1494
 PARSER_DEBUG_RANGE = None # range(1440, 1500)
-
-
-def fix_whitespaces(element, leading=True, ending=True, content=True):
-    def fix_content(element):
-        return element.replace(' ', '-')
-    def fix_leading(element):
-        while element[0] == ' ':
-            element = element[1:]
-        return element
-    def fix_ending(element):
-        length = len(element)
-        while element[length-1] == ' ':
-            element = element[:length-1]
-            length = len(element)
-        return element
-    if leading and not ending:
-        if content:
-            return fix_content(fix_leading(leading))
-        return fix_leading(element)
-    elif ending and not leading:
-        if content:
-            return fix_content(fix_ending(element))
-        return fix_ending(element)
-    elif leading and ending:
-        if content:
-            return fix_content(fix_ending(fix_leading(element)))
-        return fix_ending(fix_leading(element))
 
 
 class ImportError(Exception):
