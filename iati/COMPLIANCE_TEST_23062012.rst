@@ -24,14 +24,14 @@ http://iatiregistry.org/publisher/undp
 previous:
 [ v ] link ok, parse ok
 current:
-
+[ v ] link ok, parse ok
 
 http://iatiregistry.org/publisher/transparency-international
 
 previous:
 [ v ] link ok, parse ok
 current:
-
+[ v ] link ok, parse ok
 
 http://iatiregistry.org/publisher/worldbank
 
@@ -74,7 +74,7 @@ http://iatiregistry.org/publisher/pwyf
 previous:
 [ x ] link ok, parse failed (ValueError: time data '2011-11-29T00:00:00+00:00' does not match format '%Y-%m-%d+%H:%M:%S')
 current:
-
+[ v ] link ok, parse ok
 
 http://iatiregistry.org/publisher/oxfamgb
 
@@ -88,7 +88,7 @@ http://iatiregistry.org/publisher/aa
 previous:
 [ ~ ] link ok, parse failed, manual fix (Leading whitespace on some iati-identifier and reporting-org elements)
 current:
-ERROR - empty providing-org ref
+[ v ] link ok, parse ok
 
 http://iatiregistry.org/publisher/globalgiving
 
