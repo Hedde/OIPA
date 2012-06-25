@@ -1,3 +1,6 @@
+# Django specific
+from django.db.models import Q
+
 # Tastypie specific
 from tastypie import fields
 from tastypie.authentication import ApiKeyAuthentication
@@ -6,9 +9,6 @@ from tastypie.models import create_api_key
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-
-# Django specific
-from django.db.models import Q
 
 # Data specific
 from data.models.activity import IATIActivity

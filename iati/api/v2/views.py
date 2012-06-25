@@ -1,7 +1,8 @@
-from django.http import HttpResponse
+# Django specific
 from django.template.response import TemplateResponse
 
-def docs(request):
+
+def docs_index(request):
     context = {}
-    t = TemplateResponse(request, 'documentation_v2.html', context)
+    t = TemplateResponse(request, 'base.html', context)
     return t.render()
