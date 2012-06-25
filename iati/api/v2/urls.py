@@ -15,7 +15,7 @@ v2_api.register(OrganisationResource())
 v2_api.register(ActivityResource())
 
 def redirect(request):
-    return HttpResponseRedirect('/v2/docs')
+    return HttpResponseRedirect('/api/v2/docs/')
 
 urlpatterns = patterns('',
     (r'^$', 'api.v2.views.docs_index'),
