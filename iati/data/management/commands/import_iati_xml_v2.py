@@ -625,13 +625,17 @@ class ActivityParser(Parser):
             value=transaction.value.text.replace(',', '.')
         else:
             value='0'
-        value_date = self._parse_date(transaction.value.get('value-date'))
+        value_date = None
         transaction_date = None
+        if transaction.value.get('value-date'):
+            value_date = self._parse_date(transaction.value.get('value-date'))
         if hasattr(transaction, 'transaction-date'):
             if transaction['transaction-date'].get('iso-date'):
                 transaction_date = self._parse_date(transaction['transaction-date'].get('iso-date'))
-        if not value_date:
+        if not value_date and transaction_date:
             value_date = transaction_date
+        if value_date and not transaction_date:
+            transaction_date = value_date
         transaction_type = transaction['transaction-type'].get('code')
         iati_transaction = IATITransaction.objects.create(
                                                         iati_activity=iati_activity,
