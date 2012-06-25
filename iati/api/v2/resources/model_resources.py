@@ -1,4 +1,5 @@
 # Tastypie specific
+from django.db.models import Q
 from tastypie import fields
 from tastypie.authentication import ApiKeyAuthentication
 from tastypie.authorization import DjangoAuthorization, Authorization
@@ -33,24 +34,13 @@ class OrganisationResource(ModelResource):
         return super(OrganisationResource, self).dehydrate(bundle)
 
 
-class CountryResource(ModelResource):
-    class Meta:
-        queryset = Country.objects.all()
-        resource_name = 'countries'
-        serializer = Serializer(formats=['xml', 'json'])
-
-    def dehydrate(self, bundle):
-        obj = self.obj_get(iso=bundle.data['iso'])
-        bundle.data['country'] = obj.get_iso_display()
-        return bundle
-
-
 class ActivityResource(ModelResource):
     """
     @description
     Displays Activities, with nested Organisation
 
     @implementation
+    http://127.0.0.1:8080/api/v2/activities/?format=json&query=EMTA
     http://127.0.0.1:8080/api/v2/activities/?format=json
     http://127.0.0.1:8080/api/v2/activities/?format=json&reporting_organisation__ref=SE-6
     http://127.0.0.1:8080/api/v2/activities/?format=json&reporting_organisation__org_name__icontains=Oxfam
@@ -67,6 +57,26 @@ class ActivityResource(ModelResource):
             'reporting_organisation': ALL_WITH_RELATIONS
             }
 
+    def apply_filters(self, request, applicable_filters):
+        base_object_list = super(ActivityResource, self).apply_filters(request,
+            applicable_filters)
+        query = request.GET.get('query', None)
+        if query:
+            qset = (
+                Q(iatiactivitytitle__title__icontains=query) |
+                Q(iatiactivitydescription__description__icontains=query)
+            )
+            base_object_list = base_object_list.filter(qset).distinct()
+        return base_object_list
+
     def dehydrate(self, bundle):
         obj = self.obj_get(iati_identifier=bundle.data['iati_identifier'])
+        titles = {}
+        for title in obj.iatiactivitytitle_set.all():
+            titles[title.language.code] = title.title
+        bundle.data['title'] = titles
+        descriptions = {}
+        for description in obj.iatiactivitydescription_set.all():
+            descriptions[description.language.code] = description.description
+        bundle.data['description'] = descriptions
         return bundle
