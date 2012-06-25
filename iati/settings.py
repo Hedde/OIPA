@@ -87,7 +87,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'data',
     'api',
-    'piston',
     'tastypie',
     'utils',
     'south',

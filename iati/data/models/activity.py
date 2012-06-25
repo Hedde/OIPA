@@ -47,8 +47,8 @@ class IATIActivity(models.Model):
     default_finance_type = models.ForeignKey(FinanceType, blank=True, null=True)
     default_tied_status_type = models.ForeignKey(TiedAidStatusType, blank=True, null=True)
 
-    date_created = models.DateTimeField(auto_now_add=True, editable=False)
-    date_updated = models.DateTimeField(editable=False)
+    date_created = models.DateField(auto_now_add=True, editable=False)
+    date_updated = models.DateField(editable=False)
 
     def __unicode__(self):
         return self.iati_identifier

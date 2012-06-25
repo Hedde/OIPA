@@ -11,8 +11,8 @@ class Organisation(models.Model):
     org_name = models.CharField(max_length=255)
     org_name_lang = models.CharField(max_length=255, blank=True, null=True)
 
-    date_created = models.DateTimeField(auto_now_add=True, editable=False)
-    date_updated = models.DateTimeField(auto_now=True, editable=False)
+    date_created = models.DateField(auto_now_add=True, editable=False)
+    date_updated = models.DateField(auto_now=True, editable=False)
 
     class Meta:
         app_label = "data"
@@ -29,8 +29,8 @@ class ParticipatingOrganisation(models.Model):
     org_name_lang = models.CharField(max_length=255, blank=True, null=True)
     role = models.CharField(max_length=500)
 
-    date_created = models.DateTimeField(auto_now_add=True, editable=False)
-    date_updated = models.DateTimeField(auto_now=True, editable=False)
+    date_created = models.DateField(auto_now_add=True, editable=False)
+    date_updated = models.DateField(auto_now=True, editable=False)
 
     def __unicode__(self):
         return self.org_name

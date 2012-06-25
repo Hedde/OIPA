@@ -40,9 +40,9 @@ from data.models.common import VocabularyType
 from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
-PARSER_DEBUG = False
+PARSER_DEBUG = True
 # Use either a number or range not both
-PARSER_DEBUG_NUMBER = None # example: 1494
+PARSER_DEBUG_NUMBER = 1 # example: 1494
 PARSER_DEBUG_RANGE = None # range(1440, 1500)
 
 
@@ -84,12 +84,9 @@ class Parser(object):
         self.force_update = force_update
         self.verbosity = verbosity
 
-    def _parse_date(self, s, format='%Y-%m-%d'):
-        if len(s) == 11:
-            return datetime.strptime(s[:10], format).date()
-        return datetime.strptime(s, format).date()
-
-    def _parse_datetime(self, s):
+    def _parse_date(self, s):
+        if len(s) > 10:
+            return dtparser.parse(s[:10]).date()
         return dtparser.parse(s).date()
 
 
@@ -179,8 +176,7 @@ class ActivityParser(Parser):
 
         iati_identifier = str(el['iati-identifier'])
         iati_identifier = fix_whitespaces(iati_identifier)
-        date_updated = self._parse_datetime(el.get('last-updated-datetime', str(datetime.now())))
-
+        date_updated = self._parse_date(el.get('last-updated-datetime', str(datetime.now().date())))
         iati_activity, created = IATIActivity.objects.get_or_create(
                                      iati_identifier=iati_identifier,
                                      reporting_organisation=organisation,
@@ -277,15 +273,16 @@ class ActivityParser(Parser):
             print "setting activity-dates"
         if hasattr(el, 'activity-date'):
             for activity_date in el['activity-date']:
-                if activity_date.get('type') == 'start-planned':
-                    iati_activity.start_planned = activity_date.get('iso-date')
-                elif activity_date.get('type') == 'start-actual':
-                    iati_activity.start_actual = activity_date.get('iso-date')
-                elif activity_date.get('type') == 'end-planned':
-                    iati_activity.end_planned = activity_date.get('iso-date')
-                elif activity_date.get('type') == 'end-actual':
-                    iati_activity.end_actual = activity_date.get('iso-date')
-                iati_activity.save()
+                if activity_date.get('iso-date'):
+                    if activity_date.get('type') == 'start-planned':
+                        iati_activity.start_planned = self._parse_date(activity_date.get('iso-date'))
+                    elif activity_date.get('type') == 'start-actual':
+                        iati_activity.start_actual = self._parse_date(activity_date.get('iso-date'))
+                    elif activity_date.get('type') == 'end-planned':
+                        iati_activity.end_planned = self._parse_date(activity_date.get('iso-date'))
+                    elif activity_date.get('type') == 'end-actual':
+                        iati_activity.end_actual = self._parse_date(activity_date.get('iso-date'))
+                    iati_activity.save()
 
         # --------------------------------------------------------------------
 
@@ -494,14 +491,15 @@ class ActivityParser(Parser):
         iati_activity.iatiactivitybudget_set.all().delete()
         if hasattr(el, 'budget'):
             if hasattr(el.budget, 'value') and hasattr(el.budget, 'period-start') and hasattr(el.budget, 'period-end'):
-                period_start = self._parse_date(el.budget['period-start'].get('iso-date'))
-                period_end = self._parse_date(el.budget['period-end'].get('iso-date'))
-                IATIActivityBudget.objects.create(
-                                               iati_activity=iati_activity,
-                                               value=str(getattr(el.budget, 'value')).replace(',', '.'),
-                                               period_start=period_start,
-                                               period_end=period_end
-                                           )
+                if el.budget['period-start'].get('iso-date') and el.budget['period-end'].get('iso-date'):
+                    period_start = self._parse_date(el.budget['period-start'].get('iso-date'))
+                    period_end = self._parse_date(el.budget['period-end'].get('iso-date'))
+                    IATIActivityBudget.objects.create(
+                                                   iati_activity=iati_activity,
+                                                   value=str(getattr(el.budget, 'value')).replace(',', '.'),
+                                                   period_start=period_start,
+                                                   period_end=period_end
+                                               )
 
         # ====================================================================
         # TRANSACTION
@@ -639,8 +637,8 @@ class ActivityParser(Parser):
 
     def _save_transaction(self, transaction, iati_activity, organisation):
         if hasattr(transaction, 'provider-org'):
-            ref = transaction['provider-org'].get('ref')
-            if not ref == '':
+            ref = transaction['provider-org'].get('ref', None)
+            if ref:
                 try:
                     organisation = Organisation.objects.get(ref=ref)
                 except Organisation.DoesNotExist:
@@ -734,9 +732,3 @@ class Command(BaseCommand):
             parser_cls(tree, force_update, verbosity).parse()
         except KeyError:
             raise ImportError('Undefined document structure')
-
-    def _parse_date(self, s, format='%Y-%m-%d'):
-        return datetime.strptime(s, format).date()
-
-    def _parse_datetime(self, s, format='%Y-%m-%dT%H:%M:%S'):
-        return datetime.strptime(s, format)
