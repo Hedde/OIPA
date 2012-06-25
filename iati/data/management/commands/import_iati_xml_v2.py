@@ -155,8 +155,6 @@ class ActivityParser(Parser):
                 except ValueError:
                     # reverse lookup
                     for k, v in ORGANISATION_TYPE_CHOICES:
-                        print reporting_organisation_type
-                        print k, v
                         if reporting_organisation_type == v:
                             reporting_organisation_type = k
                     organisation = Organisation.objects.create(
