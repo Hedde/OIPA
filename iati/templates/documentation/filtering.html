@@ -1,3 +1,29 @@
 {% extends "base.html" %}{% load i18n static %}
 
-{% block content %}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <section id="filtering">
+        <div class="page-header">
+            <h1>Interfacing <small>with the OIPA resources</small></h1>
+        </div>
+        <div class="row">
+            <div class="span12">
+                <h3 class="push_10px_top">Search</h3>
+                <p>The current API implements a combined search query on the <span class="label label-info">title</span> and <span class="label label-info">description</span> fields of the ActivityResource.</p>
+                <pre><code>http://127.0.0.1:8080/api/v2/activities/?format=json<strong>&query=Food</strong></code></pre>
+                <p>Note: The search is case insensitive</p>
+            </div>
+            <div class="span12">
+                <h3 class="push_10px_top">Countries</h3>
+                <p>The current API implements a countries filter</p>
+                <pre><code>http://127.0.0.1:8080/api/v2/activities/?format=json<strong>&countries=BB|AO|FR</strong></code></pre>
+            </div>
+            <div class="span12">
+                <h3 class="push_10px_top">Joining calls</h3>
+                <p>Calls to the API can be joined</p>
+                <pre><code>http://127.0.0.1:8080/api/v2/activities/?format=json<strong>&query=Food</strong>&countries=BB|AO|FR</code></pre>
+            </div>
+        </div>
+    </section>
+{% endblock %}

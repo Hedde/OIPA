@@ -20,9 +20,9 @@ def api_v2_docs(request):
 urlpatterns = patterns('',
     (r'^$', api_v2_docs),
     (r'^v2/$', api_v2_docs),
-    (r'^v2/docs/$', 'api.v2.views.docs_index'),
-    (r'^v2/docs/resources/$', 'api.v2.views.docs_resources'),
-    (r'^v2/docs/filtering/$', 'api.v2.views.docs_filtering'),
-    (r'^v2/docs/license/$', 'api.v2.views.docs_license'),
+    url(r'^v2/docs/$', 'api.v2.views.docs_index', name='docs'),
+    url(r'^v2/docs/getting-started/$', 'api.v2.views.docs_start', name='start_docs'),
+    url(r'^v2/docs/resources/$', 'api.v2.views.docs_resources', name='resource_docs'),
+    url(r'^v2/docs/filtering/$', 'api.v2.views.docs_filtering', name='filter_docs'),
     (r'', include(v2_api.urls)),
 )

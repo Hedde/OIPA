@@ -78,6 +78,11 @@ TEMPLATE_DIRS = (
     rel('templates'),
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "api.context_processor.version",
+)
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -91,3 +96,5 @@ INSTALLED_APPS = (
     'utils',
     'south',
 )
+
+API_VERSION = 'v2.0.1'

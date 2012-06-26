@@ -2,6 +2,7 @@
 from django.db.models import Q
 
 # Tastypie specific
+from django.utils.safestring import mark_safe
 from tastypie import fields
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
@@ -13,10 +14,15 @@ from data.models.organisation import Organisation
 
 
 class OrganisationResource(ModelResource):
+    """
+    Resource for IATI Organisations
+    """
+
     class Meta:
         queryset = Organisation.objects.all()
         resource_name = 'organisations'
         serializer = Serializer(formats=['xml', 'json'])
+        excludes = ['date_created']
         filtering = {
             # example to allow field specific filtering.
             'org_name': ALL,
@@ -32,14 +38,7 @@ class OrganisationResource(ModelResource):
 
 class ActivityResource(ModelResource):
     """
-    @description
-    Displays Activities, with nested Organisation
-
-    @implementation
-    http://127.0.0.1:8080/api/v2/activities/?format=json&query=EMTA
-    http://127.0.0.1:8080/api/v2/activities/?format=json
-    http://127.0.0.1:8080/api/v2/activities/?format=json&reporting_organisation__ref=SE-6
-    http://127.0.0.1:8080/api/v2/activities/?format=json&reporting_organisation__org_name__icontains=Oxfam
+    Resource for IATI Activities
     """
     reporting_organisation = fields.ForeignKey(OrganisationResource, attribute='reporting_organisation', full=True, null=True)
 

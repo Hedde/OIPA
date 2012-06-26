@@ -1,3 +1,92 @@
 {% extends "base.html" %}{% load i18n static %}
 
-{% block content %}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <section id="resources">
+        <div class="page-header">
+            <h1>Resources <small>available API resources</small></h1>
+        </div>
+        <div class="row">
+            <div class="span12">
+                <p>The OIPA API currently implements two resources:</p>
+                <ul>
+                    <li>OrganisationResource</li>
+                    <li>ActivityResource</li>
+                </ul>
+                <p>Note: The current API implementation ({{ version }}) nests basic OrganisationResource fields within the ActivityResource.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span12">
+                <h3 class="push_20px_top">{{ resources.organisation }}</h3>
+                <p>The OrganisationResource represents an IATI standard represenation of an Organsation</p>
+                <p>Available fields:</p>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>IATI Component</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="label label-info">date_updated</span></td>
+                            <td>last-updated-datetime</td>
+                            <td>"24-09-2011"</td>
+                        </tr>
+                        <tr>
+                            <td><span class="label label-info">org_name</span></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><span class="label label-info">org_name_lang</span></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><span class="label label-info">ref</span></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><span class="label label-info">resource_uri</span></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><span class="label label-info">type</span></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span12">
+                <h3 class="push_20px_top">{{ resources.activity }}</h3>
+                <p>The ActivityResource represents an IATI standard represenation of an Activity</p>
+                <p>Available fields:</p>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>IATI Component</th>
+                        <th>Example</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><span class="label label-info">...</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+{% endblock %}
