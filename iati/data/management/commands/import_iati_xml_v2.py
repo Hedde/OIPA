@@ -465,16 +465,8 @@ class ActivityParser(Parser):
             print "setting activity-budgets"
         iati_activity.iatiactivitybudget_set.all().delete()
         if hasattr(el, 'budget'):
-            if hasattr(el.budget, 'value') and hasattr(el.budget, 'period-start') and hasattr(el.budget, 'period-end'):
-                if el.budget['period-start'].get('iso-date') and el.budget['period-end'].get('iso-date'):
-                    period_start = self._parse_date(el.budget['period-start'].get('iso-date'))
-                    period_end = self._parse_date(el.budget['period-end'].get('iso-date'))
-                    IATIActivityBudget.objects.create(
-                                                   iati_activity=iati_activity,
-                                                   value=str(getattr(el.budget, 'value')).replace(',', '.'),
-                                                   period_start=period_start,
-                                                   period_end=period_end
-                                               )
+            for budget in el.budget:
+                self._save_budget(budget, iati_activity)
 
         # ====================================================================
         # TRANSACTION
@@ -608,6 +600,19 @@ class ActivityParser(Parser):
 #            e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
 #            raise Exception(e)
 
+        return
+
+    def _save_budget(self, budget, iati_activity):
+        if hasattr(budget, 'value') and hasattr(budget, 'period-start') and hasattr(budget, 'period-end'):
+            if budget['period-start'].get('iso-date') and budget['period-end'].get('iso-date'):
+                period_start = self._parse_date(budget['period-start'].get('iso-date'))
+                period_end = self._parse_date(budget['period-end'].get('iso-date'))
+                IATIActivityBudget.objects.create(
+                    iati_activity=iati_activity,
+                    value=str(getattr(budget, 'value')).replace(',', '.'),
+                    period_start=period_start,
+                    period_end=period_end
+                )
         return
 
     def _save_transaction(self, transaction, iati_activity, organisation):

@@ -2,9 +2,11 @@
 from tastypie.resources import ModelResource
 
 # Data specific
+from data.models.activity import IATIActivityBudget
 from data.models.activity import IATIActivityCountry
 from data.models.activity import IATIActivityRegion
 from data.models.activity import IATIActivitySector
+from data.models.activity import IATITransaction
 from data.models.common import ActivityStatusType
 from data.models.common import CollaborationType
 from data.models.common import FlowType
@@ -95,4 +97,24 @@ class TiedAidStatusTypeResource(ModelResource):
     def dehydrate(self, bundle):
         obj = self.obj_get(code=bundle.data['code'])
         bundle.data['name'] = obj.get_code_display()
+        return bundle
+
+
+class ActivityBudgetResource(ModelResource):
+    class Meta:
+        queryset = IATIActivityBudget.objects.all()
+        include_resource_uri = False
+
+    def dehydrate(self, bundle):
+        bundle.data.pop('id')
+        return bundle
+
+
+class TransactionResource(ModelResource):
+    class Meta:
+        queryset = IATITransaction.objects.all()
+        include_resource_uri = False
+
+    def dehydrate(self, bundle):
+        bundle.data.pop('id')
         return bundle
