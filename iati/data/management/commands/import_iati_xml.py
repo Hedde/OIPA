@@ -8,6 +8,7 @@ from optparse import make_option
 from utils.helpers import fix_whitespaces
 
 # Django specific
+from django.conf import settings
 from django.core.management import BaseCommand
 from django.db.transaction import commit_on_success
 
@@ -43,10 +44,11 @@ from data.models.organisation import Organisation
 from data.models.organisation import ParticipatingOrganisation
 
 
-PARSER_DEBUG = False
+PARSER_DEBUG = getattr(settings, 'PARSER_DEBUG', False)
+
 # Use either a number or range not both
-PARSER_DEBUG_NUMBER = None # example: 1494
-PARSER_DEBUG_RANGE = None # range(1440, 1500)
+PARSER_DEBUG_NUMBER = getattr(settings, 'PARSER_DEBUG_NUMBER', None) # example: 1494
+PARSER_DEBUG_RANGE = getattr(settings, 'PARSER_DEBUG_RANGE', None) # range(1440, 1500)
 
 
 class ImportError(Exception):
