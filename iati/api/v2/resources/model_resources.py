@@ -2,23 +2,25 @@
 from django.db.models import Q
 
 # Tastypie specific
-from django.utils.safestring import mark_safe
 from tastypie import fields
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 # Data specific
-from data.models.activity import IATIActivity, IATIActivityCountry, IATIActivityRegion
-from data.models.common import ActivityStatusType
+from data.models.activity import IATIActivity
 from data.models.organisation import Organisation
+
+# App specific
+from api.v2.resources.sub_model_resources import RecipientCountryResource
+from api.v2.resources.sub_model_resources import RecipientRegionResource
+from api.v2.resources.sub_model_resources import StatusResource
 
 
 class OrganisationResource(ModelResource):
     """
     Resource for IATI Organisations
     """
-
     class Meta:
         queryset = Organisation.objects.all()
         resource_name = 'organisations'
@@ -35,44 +37,6 @@ class OrganisationResource(ModelResource):
         bundle.data['type'] = obj.get_type_display()
 #        bundle.data['total_activities'] = obj.iatiactivity_set.count()
         return super(OrganisationResource, self).dehydrate(bundle)
-
-
-class StatusResource(ModelResource):
-    class Meta:
-        queryset = ActivityStatusType.objects.all()
-        fields = ['code']
-        include_resource_uri = False
-
-    def dehydrate(self, bundle):
-        obj = self.obj_get(code=bundle.data['code'])
-        bundle.data['name'] = obj.get_code_display()
-        return bundle
-
-
-class RecipientCountryResource(ModelResource):
-    class Meta:
-        queryset = IATIActivityCountry.objects.all()
-        include_resource_uri = False
-
-    def dehydrate(self, bundle):
-        obj = self.obj_get(id=bundle.data['id'])
-        bundle.data['iso'] = obj.country.iso
-        bundle.data['name'] = obj.country.get_iso_display()
-        bundle.data.pop('id')
-        return bundle
-
-
-class RecipientRegionResource(ModelResource):
-    class Meta:
-        queryset = IATIActivityRegion.objects.all()
-        include_resource_uri = False
-
-    def dehydrate(self, bundle):
-        obj = self.obj_get(id=bundle.data['id'])
-        bundle.data['code'] = obj.region.code
-        bundle.data['name'] = obj.region.get_code_display()
-        bundle.data.pop('id')
-        return bundle
 
 
 class ActivityResource(ModelResource):
