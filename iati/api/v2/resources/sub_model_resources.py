@@ -1,5 +1,6 @@
 # Tastypie specific
 from tastypie.resources import ModelResource
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 # Data specific
 from data.models.activity import IATIActivityBudget
@@ -114,6 +115,9 @@ class TransactionResource(ModelResource):
     class Meta:
         queryset = IATITransaction.objects.all()
         include_resource_uri = False
+        filtering = {
+            'value': ALL,
+            }
 
     def dehydrate(self, bundle):
         bundle.data.pop('id')

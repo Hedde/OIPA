@@ -63,6 +63,7 @@ class ActivityResource(ModelResource):
     default_tied_status_type = fields.ForeignKey(TiedAidStatusTypeResource, attribute='default_tied_status_type', full=True, null=True)
     activity_budgets = fields.ToManyField(ActivityBudgetResource, 'iatiactivitybudget_set', full=True, null=True)
     activity_transactions = fields.ToManyField(TransactionResource, 'iatitransaction_set', full=True, null=True)
+    #iatitransaction = fields.ToManyField(TransactionResource, 'iatitransaction', full=True, null=True)
 
     class Meta:
         queryset = IATIActivity.objects.all()
@@ -70,9 +71,9 @@ class ActivityResource(ModelResource):
         serializer = Serializer(formats=['xml', 'json'])
         filtering = {
             # example to allow field specific filtering.
-            'activity_status': ALL,
-            'iati_identifier': ALL,
-            'reporting_organisation': ALL_WITH_RELATIONS
+#            'iatitransaction': ALL_WITH_RELATIONS,
+#            'iati_identifier': ALL,
+#            'reporting_organisation': ALL_WITH_RELATIONS
         }
 
     def apply_filters(self, request, applicable_filters):
@@ -105,4 +106,5 @@ class ActivityResource(ModelResource):
         for description in obj.iatiactivitydescription_set.all():
             descriptions[description.language.code] = description.description
         bundle.data['description'] = descriptions
+        # transactions
         return bundle
