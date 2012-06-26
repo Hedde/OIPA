@@ -10,6 +10,14 @@ RELATED_CHOICES = (
     (MULTIFUNDED, _(u"A multifunded, or co-funded activity. The identifier should be globally unique and shared by all reporters of this activity.")),
 )
 
+STATUS_CHOICES = (
+    (1, _(u"Pipeline/identification")),
+    (2, _(u"Implementation")),
+    (3, _(u"Completion")),
+    (4, _(u"Post-completion")),
+    (5, _(u"Cancelled")),
+)
+
 TRANSACTION_TYPE_CHOICES = (
     (u"C", _(u"Commitment")),
     (u"D", _(u"Disbursement")),

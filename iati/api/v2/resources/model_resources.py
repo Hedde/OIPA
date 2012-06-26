@@ -10,6 +10,7 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 # Data specific
 from data.models.activity import IATIActivity
+from data.models.common import ActivityStatusType
 from data.models.organisation import Organisation
 
 
@@ -36,11 +37,24 @@ class OrganisationResource(ModelResource):
         return super(OrganisationResource, self).dehydrate(bundle)
 
 
+class StatusResource(ModelResource):
+    class Meta:
+        queryset = ActivityStatusType.objects.all()
+        fields = ['code']
+        include_resource_uri = False
+
+    def dehydrate(self, bundle):
+        obj = self.obj_get(code=bundle.data['code'])
+        bundle.data['name'] = obj.get_code_display()
+        return bundle
+
+
 class ActivityResource(ModelResource):
     """
     Resource for IATI Activities
     """
     reporting_organisation = fields.ForeignKey(OrganisationResource, attribute='reporting_organisation', full=True, null=True)
+    activity_status = fields.ForeignKey(StatusResource, attribute='activity_status', full=True, null=True)
 
     class Meta:
         queryset = IATIActivity.objects.all()
@@ -73,12 +87,22 @@ class ActivityResource(ModelResource):
 
     def dehydrate(self, bundle):
         obj = self.obj_get(iati_identifier=bundle.data['iati_identifier'])
+        # titles
         titles = {}
         for title in obj.iatiactivitytitle_set.all():
             titles[title.language.code] = title.title
         bundle.data['title'] = titles
+        # descriptions
         descriptions = {}
         for description in obj.iatiactivitydescription_set.all():
             descriptions[description.language.code] = description.description
         bundle.data['description'] = descriptions
+        # region
+        if obj.iatiactivityregion_set.all():
+            bundle.data['region'] = obj.iatiactivityregion_set.all()[0].region.code
+        # sectors
+#        sectors = {}
+#        for sector in obj.iatisector_set.all():
+#            pass
+#        bundle.date['sector'] = None
         return bundle

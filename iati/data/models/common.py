@@ -9,6 +9,7 @@ from data.models.constants import DISBURSEMENT_CHANNEL_CHOICES
 from data.models.constants import FLOW_TYPE_CHOICES
 from data.models.constants import POLICY_SIGNIFICANCE_CHOICES
 from data.models.constants import REGION_CHOICES
+from data.models.constants import STATUS_CHOICES
 from data.models.constants import TIED_AID_STATUS_CHOICES
 from data.models.constants import TRANSACTION_TYPE_CHOICES
 from data.models.constants import VOCABULARY_CHOICES
@@ -110,8 +111,7 @@ class CurrencyType(CommonType):
 
 
 class ActivityStatusType(models.Model):
-    code = models.IntegerField(max_length=8, unique=True, blank=True, null=True)
-    name = models.CharField(max_length=15)
+    code = models.IntegerField(max_length=8, unique=True, choices=STATUS_CHOICES, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     language = models.ForeignKey(Country, blank=True, null=True)
 
