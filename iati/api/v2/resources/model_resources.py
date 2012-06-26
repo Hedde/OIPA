@@ -9,7 +9,7 @@ from tastypie.serializers import Serializer
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 # Data specific
-from data.models.activity import IATIActivity
+from data.models.activity import IATIActivity, IATIActivityCountry, IATIActivityRegion
 from data.models.common import ActivityStatusType
 from data.models.organisation import Organisation
 
@@ -49,12 +49,40 @@ class StatusResource(ModelResource):
         return bundle
 
 
+class RecipientCountryResource(ModelResource):
+    class Meta:
+        queryset = IATIActivityCountry.objects.all()
+        include_resource_uri = False
+
+    def dehydrate(self, bundle):
+        obj = self.obj_get(id=bundle.data['id'])
+        bundle.data['iso'] = obj.country.iso
+        bundle.data['name'] = obj.country.get_iso_display()
+        bundle.data.pop('id')
+        return bundle
+
+
+class RecipientRegionResource(ModelResource):
+    class Meta:
+        queryset = IATIActivityRegion.objects.all()
+        include_resource_uri = False
+
+    def dehydrate(self, bundle):
+        obj = self.obj_get(id=bundle.data['id'])
+        bundle.data['code'] = obj.region.code
+        bundle.data['name'] = obj.region.get_code_display()
+        bundle.data.pop('id')
+        return bundle
+
+
 class ActivityResource(ModelResource):
     """
     Resource for IATI Activities
     """
     reporting_organisation = fields.ForeignKey(OrganisationResource, attribute='reporting_organisation', full=True, null=True)
     activity_status = fields.ForeignKey(StatusResource, attribute='activity_status', full=True, null=True)
+    recipient_country = fields.ToManyField(RecipientCountryResource, 'iatiactivitycountry_set', full=True, null=True)
+    recipient_region = fields.ToManyField(RecipientRegionResource, 'iatiactivityregion_set', full=True, null=True)
 
     class Meta:
         queryset = IATIActivity.objects.all()
@@ -97,9 +125,9 @@ class ActivityResource(ModelResource):
         for description in obj.iatiactivitydescription_set.all():
             descriptions[description.language.code] = description.description
         bundle.data['description'] = descriptions
-        # region
-        if obj.iatiactivityregion_set.all():
-            bundle.data['region'] = obj.iatiactivityregion_set.all()[0].region.code
+#        # region
+#        if obj.iatiactivityregion_set.all():
+#            bundle.data['region'] = obj.iatiactivityregion_set.all()[0].region.code
         # sectors
 #        sectors = {}
 #        for sector in obj.iatisector_set.all():

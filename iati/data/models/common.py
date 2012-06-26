@@ -36,13 +36,15 @@ class Country(models.Model):
 
 
 class Region(models.Model):
-    code = models.CharField(max_length=5, primary_key=True, choices=REGION_CHOICES)
+    code = models.IntegerField(max_length=5, primary_key=True, choices=REGION_CHOICES)
 
     def __unicode__(self):
         return "%s - %s" % (self.code, self.get_code_display())
 
     class Meta:
         app_label = "data"
+        verbose_name = _("region")
+        verbose_name_plural = _("regions")
 
 
 class CommonType(models.Model):
