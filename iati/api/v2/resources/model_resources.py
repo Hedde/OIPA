@@ -89,12 +89,4 @@ class ActivityResource(ModelResource):
         for description in obj.iatiactivitydescription_set.all():
             descriptions[description.language.code] = description.description
         bundle.data['description'] = descriptions
-#        # region
-#        if obj.iatiactivityregion_set.all():
-#            bundle.data['region'] = obj.iatiactivityregion_set.all()[0].region.code
-        # sectors
-#        sectors = {}
-#        for sector in obj.iatisector_set.all():
-#            pass
-#        bundle.date['sector'] = None
         return bundle
