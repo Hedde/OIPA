@@ -514,6 +514,7 @@ class ActivityParser(Parser):
 #            e = "ValueError: Unsupported country_iso '"+str(recipient_country.get('code'))+"' in COUNTRIES_TUPLE"
 #            raise Exception(e)
             pass
+        return
 
     def _save_recipient_region(self, recipient_region, iati_activity):
         match = None
@@ -531,6 +532,7 @@ class ActivityParser(Parser):
 #            e = "ValueError: Unsupported country_iso '"+str(recipient_country.get('code'))+"' in REGION_CHOICES"
 #            raise Exception(e)
             pass
+        return
 
     def _save_participating_org(self, participating_org, iati_activity):
         participating_organisation = ParticipatingOrganisation.objects.create(
@@ -550,6 +552,7 @@ class ActivityParser(Parser):
                     if participating_organisation_type == v:
                         participating_organisation.type = k
             participating_organisation.save()
+        return
 
     def _save_policy_marker(self, policy_marker, iati_activity):
         policy = None
@@ -580,6 +583,7 @@ class ActivityParser(Parser):
                 pass
 #                e = "ValueError: Unsupported vocabulary_type '"+str(iati_activity_sector_vocabulary_type)+"' in VOCABULARY_CHOICES_MAP"
 #                raise Exception(e)
+        return
 
     def _save_sector(self, sector, iati_activity):
         iati_activity_sector_code = sector.get('code')
@@ -669,7 +673,6 @@ class ActivityParser(Parser):
                                        )
                 iati_transaction.receiver_org=rec_organisation
                 iati_transaction.save()
-
         return
 
 
