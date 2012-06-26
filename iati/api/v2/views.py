@@ -1,5 +1,7 @@
 # Django specific
 from django.template.response import TemplateResponse
+
+# App specific
 from api.v2.resources.model_resources import ActivityResource
 from api.v2.resources.model_resources import OrganisationResource
 
