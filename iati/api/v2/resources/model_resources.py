@@ -15,6 +15,12 @@ from data.models.organisation import Organisation
 from api.v2.resources.sub_model_resources import RecipientCountryResource
 from api.v2.resources.sub_model_resources import RecipientRegionResource
 from api.v2.resources.sub_model_resources import StatusResource
+from api.v2.resources.sub_model_resources import SectorResource
+from api.v2.resources.sub_model_resources import CollaborationTypeResource
+from api.v2.resources.sub_model_resources import FlowTypeResource
+from api.v2.resources.sub_model_resources import FinanceTypeResource
+from api.v2.resources.sub_model_resources import AidTypeResource
+from api.v2.resources.sub_model_resources import TiedAidStatusTypeResource
 
 
 class OrganisationResource(ModelResource):
@@ -35,7 +41,7 @@ class OrganisationResource(ModelResource):
     def dehydrate(self, bundle):
         obj = self.obj_get(ref=bundle.data['ref'])
         bundle.data['type'] = obj.get_type_display()
-#        bundle.data['total_activities'] = obj.iatiactivity_set.count()
+        bundle.data['total_activities'] = obj.iatiactivity_set.count()
         return super(OrganisationResource, self).dehydrate(bundle)
 
 
@@ -47,6 +53,12 @@ class ActivityResource(ModelResource):
     activity_status = fields.ForeignKey(StatusResource, attribute='activity_status', full=True, null=True)
     recipient_country = fields.ToManyField(RecipientCountryResource, 'iatiactivitycountry_set', full=True, null=True)
     recipient_region = fields.ToManyField(RecipientRegionResource, 'iatiactivityregion_set', full=True, null=True)
+    sector = fields.ToManyField(SectorResource, 'iatiactivitysector_set', full=True, null=True)
+    collaboration_type = fields.ForeignKey(CollaborationTypeResource, attribute='collaboration_type', full=True, null=True)
+    default_flow_type = fields.ForeignKey(FlowTypeResource, attribute='default_flow_type', full=True, null=True)
+    default_finance_type = fields.ForeignKey(FinanceTypeResource, attribute='default_finance_type', full=True, null=True)
+    default_aid_type = fields.ForeignKey(AidTypeResource, attribute='default_aid_type', full=True, null=True)
+    default_tied_status_type = fields.ForeignKey(TiedAidStatusTypeResource, attribute='default_tied_status_type', full=True, null=True)
 
     class Meta:
         queryset = IATIActivity.objects.all()

@@ -444,9 +444,10 @@ class ActivityParser(Parser):
             tied_aid_status = el['default-tied-status'].get('code')
             try:
                 if int(tied_aid_status) in range(3, 6):
-                    iati_activity.default_aid_type = TiedAidStatusType.objects.get_or_create(
+                    iati_activity.default_tied_status_type = TiedAidStatusType.objects.get_or_create(
                                                          code=int(tied_aid_status)
                                                      )[0]
+                    iati_activity.save()
             except ValueError:
                 pass
 
